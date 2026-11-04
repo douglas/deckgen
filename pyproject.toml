@@ -1,0 +1,67 @@
+[project]
+name = "deckgen"
+dynamic = ["version"]
+description = "Render self-contained HTML slide decks from YAML specs, with checks, data-driven diagrams, PDF export and contact sheets."
+readme = "README.md"
+license = "AGPL-3.0-or-later"
+license-files = ["LICENSE", "THIRD_PARTY_NOTICES.md"]
+authors = [{ name = "Douglas Soares de Andrade", email = "code@douglasandrade.com" }]
+keywords = ["slides", "presentations", "yaml", "diagrams", "agents"]
+classifiers = [
+  "Development Status :: 3 - Alpha",
+  "Environment :: Console",
+  "Intended Audience :: Developers",
+  "Operating System :: OS Independent",
+  "Programming Language :: Python :: 3",
+  "Topic :: Multimedia :: Graphics :: Presentation",
+]
+requires-python = ">=3.11"
+dependencies = ["PyYAML>=6"]
+
+[dependency-groups]
+dev = ["mypy>=1.18", "ruff>=0.14", "types-PyYAML>=6"]
+
+[project.urls]
+Repository = "https://github.com/douglas/deckgen"
+Issues = "https://github.com/douglas/deckgen/issues"
+Changelog = "https://github.com/douglas/deckgen/blob/main/CHANGELOG.md"
+
+[project.scripts]
+deckgen = "deckgen.cli:main"
+
+[build-system]
+requires = ["setuptools>=77"]  # SPDX license expressions (PEP 639)
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.setuptools.package-data]
+deckgen = ["shell.html"]
+
+[tool.setuptools.dynamic]
+version = { attr = "deckgen.__version__" }
+
+[tool.ruff]
+line-length = 120
+target-version = "py311"
+
+[tool.ruff.lint]
+select = ["E", "F", "W", "B", "UP", "SIM", "RUF", "PTH", "PERF", "I", "N", "C4", "RET", "ARG", "PL"]
+ignore = [
+  "E501",     # long SVG and HTML f-strings read better on one line; the formatter handles code
+  "RUF001", "RUF002", "RUF003",  # typographic characters (×, —, ·) are intentional in deck text
+  "PLR2004",  # layout numbers are pixel values, not magic constants
+  "PLR0912", "PLR0913", "PLR0915",  # the diagram layouts are long by nature
+]
+
+[tool.ruff.lint.per-file-ignores]
+"src/deckgen/diagrams.py" = ["N806", "ARG005"]  # W, H, GAP… are layout constants; TURN_LINES lambdas share one signature
+"src/deckgen/render.py" = ["ARG001"]            # every block renderer takes (body, ctx), used or not
+"tests/*" = ["PLR0904", "PT"]
+
+[tool.mypy]
+python_version = "3.11"
+strict = true
+warn_unreachable = true
+files = ["src/deckgen", "tests"]

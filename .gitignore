@@ -1,0 +1,8 @@
+*.pdf
+__pycache__/
+build/out/
+out/
+*.egg-info/
+.venv/
+build/
+.coverage
