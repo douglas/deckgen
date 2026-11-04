@@ -190,7 +190,7 @@ File paths go to stdout and diagnostics to stderr. Exit codes are 0 for success,
 output_dir = "~/decks"            # where a relative meta.output resolves (default: the current directory)
 snap_dir   = "~/decks/out/snap"   # where contact sheets go without --dir (default: the temp directory)
 chrome     = "chromium"           # browser for pdf and snap (default: the first Chromium-family browser on PATH)
-theme      = "catppuccin"         # theme decks open in, and pdf and snap use (default: midnight)
+theme      = "catppuccin"         # midnight, editorial or catppuccin: the theme decks open in, and pdf and snap use (default: midnight)
 ```
 
 `$DECKGEN_CHROME` overrides `chrome`. A `?theme=` in the URL, or the viewer's last pick in that browser, wins over `theme`. `-o` and absolute `meta.output` paths always win.
