@@ -1,0 +1,95 @@
+# Spec template for a project alignment deck. Copy it into your decks repo, for example
+# specs/<project>/update-1.yaml, and replace every TODO(ask). deckgen check refuses to render while any remain.
+#
+# Inline text supports **bold**, `code` and [label](https://url). Block types per slide:
+#   kpis, agenda, cards, table, workstreams, callout, and diagram
+#   (architecture | sequence | chain | blueprint). See AGENTS.md for every field.
+meta:
+  title: "TODO(ask): <Project>: project alignment, update 1"
+  brand: "TODO(ask): <Project>"
+  subtitle: "Project alignment · Update 1 · TODO(ask): <date>"
+  output: out/TODO(ask)-alignment-update1.html
+  teams:   # order sets owner-tag colors
+    - { name: "TODO(ask): <team 1>" }
+    - { name: "TODO(ask): <team 2>" }
+
+# decisions_made:          # updates only: listed in "What changed"
+#   - { what: <decision>, by: <who and when> }
+
+slides:
+  - layout: title
+    part: intro
+    kicker: "Project alignment · Update 1 · TODO(ask): <date>"
+    title: "TODO(ask): <Project>"
+    lede: "TODO(ask): one sentence on what the project does for users."
+    blocks:
+      - kpis:
+          - { value: "TODO(ask): <n weeks>", label: "to the <milestone>" }
+          - { value: "<n> teams", label: "TODO(ask): <team · team>" }
+      - agenda: auto
+
+  - part: glossary
+    kicker: Glossary
+    headline: Terms we all use the same way.
+    blocks:
+      - cards:
+          glossary: true
+          columns: 4
+          font_size: 15
+          cards:
+            - { title: "TODO(ask): <term>", owner: "<team>", text: "<definition>" }
+
+  - part: problem
+    kicker: The problem
+    headline: "TODO(ask): <the problem as one sentence>."
+    blocks:
+      - cards:
+          columns: 2
+          font_size: 18
+          cards:
+            - { title: Today, items: ["TODO(ask): <pain point>"] }
+            - { title: What we need, items: ["TODO(ask): <need>"] }
+      - callout: "TODO(ask): <the insight that shapes the solution>"
+
+  - part: solution
+    agenda: Solution
+    kicker: Proposed solution · Architecture
+    headline: "TODO(ask): <how the solution works, as one sentence>."
+    blocks:
+      - diagram:
+          type: architecture
+          title: "<diagram title>"
+          desc: "<one sentence describing the diagram for screen readers>"
+          zones: [{ id: z1, label: "<TEAM OR SYSTEM>", nodes: [a] }]
+          nodes:
+            - { id: a, tag: API, name: "<component>", sub: "<detail>", col: 0, row: 0 }
+            - { id: b, tag: DB, name: "<component>", sub: "<detail>", col: 1, row: 0, kind: focal }
+          edges:
+            - { from: a, to: b, kind: accent, label: "<VERB>" }
+          legend: { accent: "<HEADLINE PATH>", focal: "<WHAT THE HIGHLIGHT MEANS>" }
+
+  - part: blockers
+    kicker: Blockers
+    headline: "TODO(ask): <what blocks progress, as one sentence>."
+    blocks:
+      - table:
+          columns: [{ label: Blocker, width: 30%, bold: true }, { label: Owner, width: 20% }, { label: Unblocked by, width: 28% }, { label: Needed before }]
+          rows:
+            - ["TODO(ask): <blocker>", "<team>", "<what unblocks it>", "<milestone>"]
+
+  - part: status
+    kicker: Status · by workstream
+    headline: "TODO(ask): <overall status, as one sentence>."
+    blocks:
+      - workstreams:
+          - { name: "TODO(ask): <workstream>", owner: "<team>", health: not_started, done: "", next: "", waiting_on: "" }
+
+  - kicker: Status · wins, asks and next sync
+    headline: "TODO(ask): <what the asks unlock, as one sentence>."
+    blocks:
+      - cards:
+          widths: 0.9fr 1.25fr 0.85fr
+          cards:
+            - { title: Wins so far, style: wins, items: ["TODO(ask): <win>"] }
+            - { title: Asks this week, items: ["**<team>:** TODO(ask): <ask>"] }
+            - { title: Next update, items: ["Starts with **what changed** since this one."] }

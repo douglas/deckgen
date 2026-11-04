@@ -1,0 +1,247 @@
+# Showcase: a fictional project alignment deck that uses every deckgen block and diagram type.
+# Each slide's speaker notes say which features it demonstrates.
+# Render:  deckgen render examples/showcase.yaml --previous examples/showcase-previous.yaml
+meta:
+  title: "Atlas search: project alignment, update 2"
+  brand: Atlas search
+  subtitle: Project alignment · Update 2 · a deckgen showcase
+  output: out/showcase.html
+  changes_headline: Indexing is back on track; the ranking review is the one new risk.
+  teams:   # order sets the owner-tag colors
+    - { name: Search }
+    - { name: Platform }
+    - { name: Design }
+    - { name: Data }
+
+decisions_made:
+  - { what: "Keep the old index read-only for 30 days after cut-over", by: "Search and Platform, week 6" }
+
+slides:
+  - layout: title
+    part: intro
+    kicker: "Atlas search · update 2"
+    title: "Atlas search: a faster, typo-tolerant search for the help center"
+    lede: We're moving help-center search to a new index that ranks by intent, tolerates typos and updates in seconds instead of hours.
+    blocks:
+      - kpis:
+          - { value: "4 weeks", label: "to cut-over" }
+          - { value: "4 teams", label: "search · platform · design · data" }
+          - { value: "< 300 ms", label: "target p95 query time" }
+          - { value: "2 of 5", label: "workstreams done" }
+      - agenda: auto
+    notes: "Title layout: title, lede, a kpis block and `agenda: auto`, which links every slide that starts a `part`. Rendered with --previous, deckgen inserts a generated What changed slide right after this one."
+
+  - part: what
+    agenda: What it is
+    kicker: What it is
+    headline: Help-center visitors find the right article on the first try, even when they misspell it.
+    blocks:
+      - cards:
+          columns: 3
+          font_size: 16
+          cards:
+            - title: Today
+              items:
+                - "Exact-match search: `pasword` finds nothing."
+                - "New articles show up after the nightly rebuild."
+                - "One in three searches ends with a support ticket."
+            - title: With Atlas
+              items:
+                - "Typo-tolerant, intent-ranked results."
+                - "Articles searchable seconds after they're published."
+                - "Results explain why they match."
+            - title: Wins so far
+              style: wins
+              items:
+                - "Index built for all 4,200 articles."
+                - "p95 query time 180 ms in staging."
+      - callout: "The goal is fewer support tickets, not a prettier search box: success is measured by tickets per thousand searches."
+    notes: "cards with `columns`, `font_size`, `items` lists and `style: wins` (the green ticks). callout as a plain string."
+
+  - part: glossary
+    agenda: Glossary
+    kicker: Glossary
+    headline: Eight terms cover the whole project.
+    blocks:
+      - cards:
+          glossary: true
+          columns: 4
+          font_size: 14
+          cards:
+            - { title: Index, owner: Search, text: "The searchable copy of every article, rebuilt from the content store." }
+            - { title: Ranker, owner: Search, text: "Orders matches by intent, freshness and past clicks." }
+            - { title: Ingest, owner: Platform, text: "The pipeline that turns a published article into index entries within seconds." }
+            - { title: Content store, owner: Platform, text: "Where articles live; the source of truth Atlas reads from." }
+            - { title: Query API, owner: Platform, text: "The endpoint the help center calls, with a 300 ms budget." }
+            - { title: Results page, owner: Design, text: "The redesigned page with match explanations and filters." }
+            - { title: Click log, owner: Data, text: "Anonymous click-through events that tune the ranker." }
+            - { title: Ticket rate, owner: Data, text: "Support tickets per thousand searches: the success metric." }
+    notes: "A glossary: `glossary: true` adds an owner tag to every card, colored by the order of meta.teams. The check warns about any term without an owner."
+
+  - part: architecture
+    agenda: Architecture
+    kicker: Architecture
+    headline: Articles flow into the index within seconds, and every query is answered from it.
+    blocks:
+      - diagram:
+          type: architecture
+          title: Atlas search architecture
+          desc: The help center calls the query API, which reads the index through the ranker. Published articles flow from the content store through ingest into the index. Click events go to the click log, which tunes the ranker. The old nightly rebuild no longer writes to the index.
+          zones:
+            - { id: serve, label: SERVING, nodes: [api, ranker] }
+            - { id: store, label: "INDEX · ATLAS", nodes: [index, ingest] }
+          nodes:
+            - { id: web, tag: EXT, name: Help center, sub: visitors, kind: ext, col: 0, row: 0, width: 176 }
+            - { id: api, tag: API, name: Query API, sub: 300 ms budget, col: 1, row: 0 }
+            - { id: ranker, tag: RANK, name: Ranker, sub: intent · freshness, col: 2, row: 0 }
+            - { id: index, tag: DATA, name: Search index, sub: typo-tolerant, kind: focal, col: 2, row: 2 }
+            - { id: ingest, tag: JOB, name: Ingest, sub: seconds, not hours, col: 1, row: 2 }
+            - { id: cms, tag: EXT, name: Content store, sub: articles, kind: ext, col: 0, row: 2, width: 176 }
+            - { id: clicks, tag: DATA, name: Click log, sub: anonymous, kind: store, col: 3, row: 0 }
+          edges:
+            - { from: web, to: api, kind: link, label: QUERY }
+            - { from: api, to: ranker, kind: accent, label: RANK }
+            - { from: ranker, to: index, kind: accent, label: READ }
+            - { from: cms, to: ingest, label: PUBLISHED }
+            - { from: ingest, to: index, label: WRITE }
+            - { from: ranker, to: clicks, kind: return, label: TUNED BY }
+          legend: { accent: THE QUERY PATH, link: EXTERNAL CALL, muted: INTERNAL, return: FEEDBACK, focal: THE NEW PIECE }
+      - callout: "**In words:** the help center asks the query API, which ranks matches from the new index. Articles reach the index through ingest in seconds."
+    notes: "architecture: nodes on a col/row grid (rows 0 to 3), zones as bounding boxes, edge kinds (accent, link, muted, return), node kinds (ext, focal, store) and a legend."
+
+  - kicker: Architecture · One query
+    headline: A query goes from the visitor to the index and back within the 300 ms budget.
+    blocks:
+      - diagram:
+          type: sequence
+          title: One search query end to end
+          desc: The visitor types a query; the help center calls the query API, which asks the ranker; the ranker reads candidates from the index, logs the impression and returns ranked results; the help center shows them with match explanations.
+          width: 1100
+          max_width: 1000
+          actors:
+            - { id: v, tag: EXT, name: Visitor, sub: help center, kind: ext, width: 164 }
+            - { id: a, tag: API, name: Query API, sub: 300 ms budget, width: 164 }
+            - { id: r, tag: RANK, name: Ranker, sub: intent model, width: 164 }
+            - { id: i, tag: DATA, name: Search index, sub: typo-tolerant, kind: focal, width: 164 }
+            - { id: c, tag: DATA, name: Click log, sub: anonymous, width: 164 }
+          messages:
+            - { from: v, to: a, kind: link, label: "\"PASWORD RESET\"" }
+            - { from: a, to: r, label: QUERY + CONTEXT }
+            - { from: r, to: i, kind: accent, label: FUZZY MATCH }
+            - { from: i, to: r, kind: return, label: CANDIDATES }
+            - { self: r, label: RANK BY INTENT }
+            - { from: r, to: c, label: IMPRESSION }
+            - { from: r, to: a, kind: return, label: TOP 10 }
+            - { from: a, to: v, kind: return, label: RESULTS + WHY }
+          legend: { link: EXTERNAL CALL, accent: INDEX READ, muted: CALL, return: RETURN, focal: THE NEW PIECE }
+      - callout: "The typo in the query is the point: the old exact-match search returned nothing for it."
+    notes: "sequence: actors and messages, including a `self` message (the loop on the ranker). Each message adds about 40 px, so eight messages plus a callout still fit on one screen."
+
+  - part: plan
+    agenda: Plan
+    kicker: Plan · What unblocks what
+    headline: Cut-over waits on the ranking review and the load test; everything else is done or in flight.
+    blocks:
+      - diagram:
+          type: chain
+          title: The path to cut-over
+          desc: Build the index, then ingest, then the ranking review, then a load test, then cut-over and retiring the old search. The results-page design and the privacy review of the click log feed into the middle steps.
+          max_width: 1080
+          steps:
+            - { tag: DONE, name: Build the index, sub: search }
+            - { tag: DONE, name: Ingest in seconds, sub: platform }
+            - { tag: AT RISK, name: Ranking review, sub: search · data, kind: focal }
+            - { name: Load test, sub: platform }
+            - { name: Cut-over, sub: all teams }
+            - { tag: GOAL, name: Retire old search, sub: week 8, kind: ext }
+          inputs:
+            - { under: 2, tag: DECISION, name: Click-log privacy, sub: data · legal, kind: decision }
+            - { under: 4, tag: INPUT, name: Results page, sub: design }
+          legend: { decision: NEEDS A DECISION, focal: AT RISK, muted: UNBLOCKS THE NEXT STEP }
+    notes: "chain: steps left to right with `inputs` feeding in from below (`under` is the step index). Step kinds: focal, decision, ext."
+
+  - kicker: Plan · The visitor's journey
+    headline: Visitors see the change in three steps, and the ranker does its work out of sight.
+    blocks:
+      - diagram:
+          type: blueprint
+          title: "Service blueprint: searching the help center"
+          desc: A visitor types a query, scans the results and opens an article. They see suggestions, ranked results with reasons, and the article. Behind the line of visibility, the query API and ranker answer, the click log records the choice, and ingest keeps the index fresh.
+          max_width: 1100
+          column: 260
+          margin: 124
+          row_height: 44
+          persona: { eyebrow: FLOW, name: Visitor }
+          stages:
+            - { id: type, eyebrow: STEP 1, name: Type a query }
+            - { id: scan, eyebrow: STEP 2, name: Scan results }
+            - { id: open, eyebrow: STEP 3, name: Open an article }
+          layers:
+            - kind: customer
+              label: DOES
+              cells:
+                - { name: Types "pasword reset" }
+                - { name: Reads the top three }
+                - { name: Follows the steps }
+            - kind: frontstage
+              label: SEES
+              cells:
+                - { name: Suggestions as they type }
+                - { name: Results with "why" }
+                - { name: The article }
+            - kind: backstage
+              label: ATLAS
+              cells:
+                - { name: Query API + ranker, focal: true }
+                - { name: Click log records it }
+                - "—"
+            - kind: support
+              label: PLATFORM
+              sublabel: out of sight
+              cells:
+                - { name: Fuzzy index lookup }
+                - "—"
+                - { name: Ingest keeps it fresh }
+          legend: { visibility: WHAT THE VISITOR SEES ENDS HERE, backstage: HIDDEN FROM THE VISITOR, focal: WHERE THE NEW RANKING HAPPENS }
+    notes: "blueprint: stages as columns and layers as rows, with a line of visibility under the frontstage. `—` marks an empty cell, `focal` highlights one, and every layer needs one cell per stage (the check enforces it)."
+
+  - part: status
+    agenda: Status
+    kicker: Status · by workstream
+    headline: Indexing and ingest are done; ranking is at risk until the privacy review lands.
+    blocks:
+      - workstreams:
+          - { name: Index, owner: Search, health: done, done: "All 4,200 articles indexed", next: "", waiting_on: "" }
+          - { name: Ingest, owner: Platform, health: done, done: "Seconds from publish to search", next: "", waiting_on: "", reason: "Shipped in week 5" }
+          - { name: Ranking, owner: Search, health: at_risk, done: "Intent model trained", next: "Review with click data", waiting_on: "Click-log privacy review", reason: "The privacy review moved two weeks" }
+          - { name: Results page, owner: Design, health: on_track, done: "Prototype tested", next: "Build", waiting_on: "" }
+          - { name: Cut-over, owner: Platform, health: not_started, done: "", next: "Load test plan", waiting_on: "Ranking review" }
+    notes: "workstreams: name, owner, health (on_track, at_risk, off_track, not_started, done), done, next, waiting_on. With --previous, any health change needs a `reason`, which the What changed slide quotes."
+
+  - part: blockers
+    agenda: Blockers
+    kicker: Blockers
+    headline: One blocker stands between us and cut-over.
+    blocks:
+      - table:
+          columns: [{ label: Blocker, width: 34%, bold: true }, { label: Owner, width: 16% }, { label: Unblocked by, width: 30% }, { label: Needed before }]
+          rows:
+            - ["Click-log privacy review", "Data", "Legal sign-off on anonymisation", "Ranking review"]
+      - callout: { text: "If the privacy review slips past week 6, cut-over moves to week 9.", tone: warn }
+    notes: "A table with an Owner column (the check requires every row to have one). Because this slide is `part: blockers`, --previous compares the first column with the previous edition's blockers and lists resolved and new ones. The callout uses `tone: warn`."
+
+  - kicker: Asks
+    headline: Two decisions this week keep cut-over in week 8.
+    blocks:
+      - cards:
+          widths: 1fr 1fr
+          cards:
+            - title: Asks this week
+              items:
+                - "**Data:** confirm the anonymisation approach for the click log."
+                - "**Platform:** book the load-test window for week 6."
+            - title: Next update
+              items:
+                - "Starts with **what changed** since this one."
+                - "Reports the first ticket-rate numbers from staging."
+    notes: "cards with explicit `widths` (CSS grid columns, validated as lengths) and inline bold."

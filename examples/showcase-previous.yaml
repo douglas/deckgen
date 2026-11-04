@@ -1,0 +1,33 @@
+# The previous edition of examples/showcase.yaml, kept short: --previous only reads its workstreams and blockers.
+# Render the showcase with it to see the generated "What changed" slide:
+#   deckgen render examples/showcase.yaml --previous examples/showcase-previous.yaml
+meta:
+  title: "Atlas search: project alignment, update 1"
+  brand: Atlas search
+  subtitle: Project alignment · Update 1 · a deckgen showcase
+  output: out/showcase-update1.html
+  teams: [{ name: Search }, { name: Platform }, { name: Design }, { name: Data }]
+
+slides:
+  - layout: title
+    part: intro
+    title: "Atlas search: a faster, typo-tolerant search for the help center"
+
+  - part: status
+    kicker: Status · by workstream
+    headline: Indexing is done; ingest is at risk until the queue migration lands.
+    blocks:
+      - workstreams:
+          - { name: Index, owner: Search, health: done, done: "All 4,200 articles indexed" }
+          - { name: Ingest, owner: Platform, health: at_risk, next: "Move to the new queue", waiting_on: "Queue migration" }
+          - { name: Ranking, owner: Search, health: on_track, next: "Train the intent model" }
+          - { name: Results page, owner: Design, health: on_track, next: "Prototype" }
+
+  - part: blockers
+    kicker: Blockers
+    headline: The queue migration blocks ingest.
+    blocks:
+      - table:
+          columns: [{ label: Blocker, bold: true }, { label: Owner }]
+          rows:
+            - ["Queue migration", "Platform"]

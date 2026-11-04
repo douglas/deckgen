@@ -1,0 +1,224 @@
+# How deckgen works, for anyone (human or agent) building a deck.
+# Render:  deckgen render examples/guide.yaml
+meta:
+  title: "Building decks with deckgen"
+  brand: deckgen
+  subtitle: deckgen 0.1 guide · November 2026
+  output: out/deckgen_guide.html
+  teams:
+    - { name: Author }
+    - { name: deckgen }
+
+slides:
+  - layout: title
+    part: intro
+    kicker: "deckgen · guide"
+    title: Building decks with deckgen
+    lede: You write what a deck says in a YAML spec; deckgen turns it into a themed, searchable, editable HTML deck and a PDF. This deck shows what it is, how it works and how to use it.
+    blocks:
+      - kpis:
+          - { value: "1 YAML file", label: "per deck, committed" }
+          - { value: "7 blocks", label: "kpis · cards · tables · diagrams · …" }
+          - { value: "4 diagrams", label: "architecture · sequence · chain · blueprint" }
+          - { value: "4 commands", label: "check · render · pdf · snap" }
+      - agenda: auto
+    notes: "The same content in reference form: README.md, docs/spec.md (every field), docs/agents.md (agents and skills) and DEVELOPMENT.md (changing deckgen). Keep your specs in their own repo; deckgen is only the tool."
+
+  - part: what
+    agenda: What it is
+    kicker: What it is
+    headline: Authors own the content; deckgen owns everything that makes it look and behave like a deck.
+    blocks:
+      - cards:
+          columns: 2
+          font_size: 16
+          cards:
+            - title: You write (the spec)
+              owner: Author
+              items:
+                - "Slides, each with a kicker, a headline that states the takeaway, blocks and speaker notes."
+                - "Diagrams as data: boxes, rows and columns, arrows and labels. No coordinates or CSS."
+                - "Teams, so every glossary term, owner tag and workstream shows who owns it."
+            - title: deckgen produces (the deck)
+              owner: deckgen
+              items:
+                - "One self-contained HTML file: themes (Midnight, Editorial, Catppuccin; light and dark), search, keyboard navigation and speaker notes."
+                - "Edit mode (press **E**) for last-mile text fixes in the browser; Save writes the edits back into a YAML spec next to the deck."
+                - "A PDF export, and contact-sheet snapshots to review every slide at once."
+                - "Checks that stop a deck with missing owners, emails or unanswered questions, and warn about label-style headlines."
+      - callout: "**Self-contained:** a deck is one HTML file; its only request is web fonts, with system fonts offline. The checks reject email addresses, but keep credentials and personal data out of specs yourself."
+
+  - part: how
+    agenda: How it works
+    kicker: How it works
+    headline: A spec goes through checks, rendering and a visual review before anyone sees it.
+    blocks:
+      - diagram:
+          type: chain
+          title: From a YAML spec to a reviewed deck
+          desc: An author writes or copies a spec, deckgen check validates it, deckgen render writes the HTML deck, deckgen snap renders every slide for review, deckgen pdf exports it, and the spec is committed. Unanswered questions and the snapshot review feed into the chain.
+          max_width: 1080
+          steps:
+            - { tag: AUTHOR, name: Write the spec, sub: specs/<project>/*.yaml }
+            - { tag: CHECK, name: deckgen check, sub: structure · owners · privacy, kind: focal }
+            - { name: deckgen render, sub: out/<name>.html }
+            - { name: deckgen snap, sub: 1440×900 contact sheet }
+            - { name: deckgen pdf, sub: out/<name>.pdf }
+            - { tag: DONE, name: Commit the spec, sub: locally, kind: ext }
+          inputs:
+            - { under: 1, tag: ASK, name: "Open questions answered", sub: by the user, kind: decision }
+            - { under: 3, tag: REVIEW, name: "Does every slide fit?", sub: fix text, not CSS, kind: decision }
+          legend: { focal: BLOCKS RENDERING ON ERRORS, decision: NEEDS A PERSON, muted: NEXT STEP }
+      - callout: "Rendering refuses while `check` reports errors, so a deck with missing owners or open questions never ships by accident. Warnings are review comments."
+    notes: "Code, all in src/deckgen/: cli.py (commands and config), check.py (guardrails), render.py (blocks), diagrams.py (diagrams), shell.html (themes, edit mode, search). The spec is the source of truth; never hand-edit the generated HTML."
+
+  - kicker: How it works · Anatomy of a spec
+    headline: A spec is metadata plus a list of slides, and each slide is a headline plus blocks.
+    blocks:
+      - cards:
+          columns: 3
+          font_size: 14
+          cards:
+            - title: "`meta`"
+              owner: Author
+              items:
+                - "`title`, `brand`, `subtitle`: required."
+                - "`output`: where the HTML goes, such as `out/<name>.html`."
+                - "`teams`: their order sets the owner-tag colors."
+                - "`decisions_made`: for update editions."
+            - title: A slide
+              owner: Author
+              items:
+                - "`part`: starts a section and an agenda entry."
+                - "`kicker`: a short label above the headline."
+                - "`headline`: a full sentence that states the takeaway."
+                - "`blocks`: the content. `notes`: speaker notes, sources and caveats."
+            - title: Inline text
+              owner: Author
+              items:
+                - "Double asterisks for **bold**, backticks for `code`, and `[label](https://…)` for links."
+                - "Quote strings that contain `: `, `#`, or start with a backtick or quote."
+                - "Mark anything you can't source with an ask marker: `TODO`, then `(ask): <question>`. Render refuses until it's answered."
+
+  - kicker: How it works · Building blocks
+    headline: Seven block types cover almost every slide; four diagram types are drawn from data.
+    blocks:
+      - table:
+          columns: [{ label: Block, width: 18%, bold: true }, { label: Use it for, width: 38% }, { label: Key fields }]
+          rows:
+            - ["`kpis`", "Big numbers on the title slide", "`value`, `label`"]
+            - ["`cards`", "Glossaries, comparisons, lists of points", "`columns`, `widths`, `font_size`, `glossary`, `cards: [title, owner, text or items]`"]
+            - ["`table`", "Rows of facts: what, owner, where", "`columns: [label, width, bold]`, `rows`. An Owner column must be filled in"]
+            - ["`workstreams`", "Status by area, with health", "`name`, `owner`, `health`, `done`, `next`, `waiting_on`"]
+            - ["`callout`", "The one thing to remember from the slide", "a string, or `{ text, tone: warn }`"]
+            - ["`diagram`", "Architecture, flows, dependencies, journeys", "`type`, `title`, `desc` (for screen readers)"]
+            - ["`agenda`", "Section links on the title slide", "`auto`"]
+      - cards:
+          columns: 4
+          font_size: 14
+          cards:
+            - { title: architecture, text: "Zones of boxes on a grid (`col`, `row` 0–3) with orthogonal arrows. For system overviews." }
+            - { title: sequence, text: "Actors and messages over time. For one request end to end." }
+            - { title: chain, text: "Steps left to right, with inputs below. For dependencies and workflows, like the previous slide." }
+            - { title: blueprint, text: "Stages × layers (does, sees, backstage, support). For user journeys." }
+
+  - part: use
+    agenda: How to use it
+    kicker: How to use it · Commands
+    headline: A few commands take a spec from draft to a reviewed HTML deck and PDF.
+    blocks:
+      - table:
+          columns: [{ label: Command, width: 46%, bold: true }, { label: What it does }]
+          rows:
+            - ["`deckgen check SPEC`", "Validates structure, owners, wording, privacy (no emails) and theme contrast"]
+            - ["`deckgen render SPEC [--previous PREV]`", "Writes the HTML deck. With `--previous`, adds a \"What changed\" slide and requires a reason for every health change"]
+            - ["`deckgen snap SPEC --themes midnight/light`", "Renders every slide at 1440×900 into one contact sheet, in `snap_dir` or `--dir`"]
+            - ["`deckgen pdf SPEC`", "Writes the HTML and the PDF next to it. Uses Chromium or Chrome, or `$DECKGEN_CHROME`"]
+            - ["`deckgen --version`", "Prints the installed version"]
+      - callout: "Install with `uv tool install` from `github.com/douglas/deckgen` (the README has the command). `~/.config/deckgen/config.toml` sets `output_dir`, `snap_dir`, `chrome` and `theme`. Paths go to stdout, messages to stderr; exit 1 means failed checks, 2 a problem such as a missing file."
+
+  - kicker: How to use it · Making slides fit
+    headline: Every slide must fit a 1440×900 screen, so review snapshots and fix overflow with words, not CSS.
+    blocks:
+      - cards:
+          columns: 2
+          font_size: 15
+          cards:
+            - title: Limits to plan for
+              items:
+                - "**Diagrams can't shrink below 1000 px wide,** so a smaller `max_width` won't make one shorter. Remove or merge steps instead."
+                - "**A sequence diagram plus a callout** fits at about 8 messages."
+                - "**Glossary:** about 8 cards per slide at 4 columns. Split larger ones, for example by team."
+                - "**Table:** about 8 rows when there's also a callout."
+            - title: How to fix overflow
+              items:
+                - "Shorten the callout or move detail into `notes`."
+                - "Split the slide in two, each with its own takeaway."
+                - "Shorten arrow labels that are wider than the gap between boxes."
+                - "Re-snap and look again. To view one slide, crop it from the contact sheet; each tile is 732×462."
+
+  - kicker: How to use it · Writing well
+    headline: Write for developers and managers at once, and source every fact.
+    blocks:
+      - cards:
+          columns: 3
+          font_size: 15
+          cards:
+            - title: Structure
+              items:
+                - "Open with a plain \"what it is\" slide before any architecture."
+                - "Headlines state the takeaway; kickers are labels."
+                - "Give every diagram a one- or two-line plain-language callout."
+            - title: Clarity
+              items:
+                - "Tag diagram boxes with the system they belong to, such as API, DATA or EXT."
+                - "Spell out abbreviations, and name real classes where engineers need them."
+                - "Give every term, owner and blocker an owning team."
+            - title: Trust
+              items:
+                - "Facts come from code, PRs, Jira and project docs, not memory. Put sources in `notes`."
+                - "Mark unknowns with an ask marker and ask the user in one batch."
+                - "No emails, client names, prompt text or credentials."
+      - callout: "Lasting fixes go in the spec. Browser edit mode is only for last-mile polish of one edition."
+
+  - part: agents
+    agenda: With an agent
+    kicker: With an agent · Skills
+    headline: Coding agents write decks through the same specs and checks, using a skill installed once.
+    blocks:
+      - cards:
+          columns: 2
+          font_size: 15
+          cards:
+            - title: "`deckgen` skill"
+              owner: deckgen
+              items:
+                - "Picked up when you ask for a deck: write the spec, check, render, snap, and look at every slide."
+                - "Carries the spec reference and the examples, so the agent doesn't need the deckgen repo open."
+            - title: "`alignment-deck` skill"
+              owner: deckgen
+              items:
+                - "Invoked by name: drafts an alignment or status deck from issues, PRs and meeting notes."
+                - "Update editions copy the last spec, change what moved and add a \"What changed\" slide."
+      - table:
+          columns: [{ label: Harness, width: 22%, bold: true }, { label: Skills folder, width: 40% }, { label: Invoke alignment-deck }]
+          rows:
+            - ["Claude Code", "`~/.claude/skills`", "`/alignment-deck`"]
+            - ["Codex", "`~/.agents/skills`", "`$alignment-deck`"]
+            - ["OpenCode", "`~/.agents/skills` or `~/.claude/skills`", "ask for the skill by name"]
+            - ["Pi", "`~/.agents/skills`", "`/skill:alignment-deck`"]
+      - callout: "`bin/install-skills` links both skills into every folder above; `bin/install-skills ~/decks` does it for one repo. Agents mark unknowns with an ask marker and ask you in one batch."
+    notes: "docs/agents.md covers the skills, what to put in a decks repo's AGENTS.md, and the mistakes agents make most: label headlines, overflow, guessed owners."
+
+  - kicker: Learn more
+    headline: Four documents and the showcase cover everything else, from the first spec to a new diagram type.
+    blocks:
+      - table:
+          columns: [{ label: Read, width: 24%, bold: true }, { label: When you want to }]
+          rows:
+            - ["`README.md`", "Install deckgen, try the examples and configure it"]
+            - ["`docs/spec.md`", "Look up any field, block, diagram, check or fit budget"]
+            - ["`docs/agents.md`", "Set up the skills for Claude Code, Codex, OpenCode or Pi"]
+            - ["`DEVELOPMENT.md`", "Change deckgen: add a block, diagram or theme, or make a release"]
+            - ["`examples/showcase.yaml`", "Copy a working example of every block and diagram"]
+      - callout: "Specs stay in your own decks repo. Found a layout bug? Report it with a small fictional spec, never a real deck."
