@@ -1,0 +1,682 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="{{THEME}}" data-mode="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>{{TITLE}}</title>
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Geist:wght@400;500;600;700&family=Geist+Mono:wght@400;500&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  /* ---------- tokens ---------- */
+  :root { --mono: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; --sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Inter, Roboto, sans-serif; --head: var(--sans); --head-weight: 750; --radius: 10px; }
+  [data-theme="midnight"][data-mode="dark"]  { --bg: #0f1724; --panel: #162133; --ink: #e8eef7; --muted: #9fb0c8; --soft: #8a9bb4; --line: #2a3a55; --code: #0b1220; --blue: #4ea1ff; --green: #3ecf8e; --amber: #f5b942; --red: #ff6b6b; --violet: #a78bfa; }
+  [data-theme="midnight"][data-mode="light"] { --bg: #f4f7fb; --panel: #ffffff; --ink: #0f1724; --muted: #52637c; --soft: #5d6b80; --line: #d7dfeb; --code: #eef2f8; --blue: #1f6feb; --green: #0f7a50; --amber: #93600f; --red: #d1242f; --violet: #7c3aed; }
+  [data-theme="editorial"] { --head: 'Instrument Serif', Georgia, serif; --head-weight: 400; --sans: Geist, system-ui, sans-serif; --mono: 'Geist Mono', ui-monospace, monospace; --radius: 4px; }
+  [data-theme="editorial"][data-mode="light"] { --bg: #f5f3ee; --panel: #fbfaf7; --ink: #2d3142; --muted: #6b6f7d; --soft: #696c77; --line: #d9d4c8; --code: #ece8df; --blue: #bf4520; --green: #4f7a3a; --amber: #8a5512; --red: #b3261e; --violet: #6b4fa0; }
+  [data-theme="editorial"][data-mode="dark"]  { --bg: #22252e; --panel: #2a2e39; --ink: #f1ede4; --muted: #b3b0a8; --soft: #a3a09a; --line: #3d4250; --code: #1b1e25; --blue: #f08a59; --green: #9cc58a; --amber: #e2b062; --red: #ef8a80; --violet: #b9a3e3; }
+  [data-theme="catppuccin"] { --sans: Inter, system-ui, sans-serif; --head: Geist, Inter, system-ui, sans-serif; --head-weight: 700; --mono: 'Geist Mono', ui-monospace, monospace; --radius: 14px; }
+  /* Catppuccin Macchiato */
+  [data-theme="catppuccin"][data-mode="dark"]  { --bg: #24273a; --panel: #1e2030; --ink: #cad3f5; --muted: #a5adcb; --soft: #939ab7; --line: #494d64; --code: #181926; --blue: #8aadf4; --green: #a6da95; --amber: #eed49f; --red: #ed8796; --violet: #c6a0f6; --teal: #8bd5ca; --peach: #f5a97f; --pink: #f5bde6; --on-accent: #181926; }
+  /* Catppuccin Latte (text colors darkened to meet 4.5:1 contrast) */
+  [data-theme="catppuccin"][data-mode="light"] { --bg: #eff1f5; --panel: #e6e9ef; --ink: #4c4f69; --muted: #5c5f77; --soft: #5f6278; --line: #ccd0da; --code: #dce0e8; --blue: #1a55d0; --green: #2a7419; --amber: #8c5400; --red: #b30c30; --violet: #7529d6; --teal: #179299; --peach: #fe640b; --pink: #ea76cb; --on-accent: #eff1f5; }
+
+  [data-theme="midnight"][data-mode="dark"] { --accent: #f0883e; --link: #4ea1ff; }
+  [data-theme="midnight"][data-mode="light"] { --accent: #c4441a; --link: #1a5fd0; }
+  [data-theme="editorial"][data-mode="light"] { --accent: #bf4520; --link: #2f5d8a; }
+  [data-theme="editorial"][data-mode="dark"] { --accent: #f08a59; --link: #8fb3de; }
+  [data-theme="catppuccin"][data-mode="dark"] { --accent: #f5a97f; --link: #8aadf4; }
+  [data-theme="catppuccin"][data-mode="light"] { --accent: #a34200; --link: #1a55d0; }
+
+  /* ---------- base ---------- */
+  * { box-sizing: border-box; }
+  html, body { margin: 0; height: 100%; }
+  html { background: var(--bg); color: var(--ink); font: 18px/1.5 var(--sans); }
+  .slide { display: none; position: relative; min-height: 100vh; padding: 84px 80px 104px; max-width: 1440px; margin: 0 auto; }
+  .slide.active { display: block; }
+  .kicker { font: 600 12px var(--mono); text-transform: uppercase; letter-spacing: .16em; color: var(--blue); }
+  h1, h2 { font-family: var(--head); font-weight: var(--head-weight); letter-spacing: -0.02em; line-height: 1.12; margin: 8px 0 14px; }
+  h1 { font-size: 60px; } h2 { font-size: 34px; max-width: 1150px; }
+  h3 { font: 700 15px var(--sans); text-transform: uppercase; letter-spacing: .08em; color: var(--muted); margin: 0 0 10px; }
+  p { margin: 0 0 12px; }
+  .lede { font-size: 22px; color: var(--muted); max-width: 980px; }
+  .muted { color: var(--muted); }
+  code { font: .85em var(--mono); background: var(--code); border: 1px solid var(--line); padding: 1px 6px; border-radius: 4px; }
+  pre { font: 14px/1.55 var(--mono); background: var(--code); border: 1px solid var(--line); border-radius: var(--radius); padding: 14px 16px; margin: 0; overflow-x: auto; }
+  ul { margin: 0; padding-left: 20px; } li { margin: 6px 0; }
+  .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 28px; }
+  .grid4 { display: grid; grid-template-columns: repeat(2, 1fr); gap: 18px; }
+  .card { background: var(--panel); border: 1px solid var(--line); border-radius: var(--radius); padding: 18px 22px; }
+  .card p:last-child { margin-bottom: 0; }
+  table { width: 100%; border-collapse: collapse; font-size: 16px; }
+  th, td { text-align: left; padding: 10px 12px; border-bottom: 1px solid var(--line); vertical-align: top; }
+  th { font: 600 12px var(--sans); text-transform: uppercase; letter-spacing: .08em; color: var(--muted); }
+  .num { font: 700 13px var(--mono); color: var(--blue); }
+  .callout { margin-top: 20px; padding: 12px 18px; border-left: 4px solid var(--blue); background: color-mix(in srgb, var(--blue) 8%, transparent); border-radius: 0 var(--radius) var(--radius) 0; }
+  .callout.warn { border-color: var(--amber); background: color-mix(in srgb, var(--amber) 9%, transparent); }
+
+  /* status vocabulary: one meaning, one color */
+  .st { display: inline-block; font: 600 12px var(--sans); padding: 2px 10px; border-radius: 999px; white-space: nowrap; }
+  .st.done { color: var(--green); background: color-mix(in srgb, var(--green) 14%, transparent); }
+  .st.built { color: var(--link, var(--blue)); }
+  .st.req { color: var(--amber); background: color-mix(in srgb, var(--amber) 15%, transparent); }
+  .st.todo { color: var(--muted); background: color-mix(in srgb, var(--muted) 14%, transparent); }
+  .st.open { color: var(--violet); background: color-mix(in srgb, var(--violet) 15%, transparent); }
+  .st.block { color: var(--red); background: color-mix(in srgb, var(--red) 14%, transparent); }
+  .legend { display: flex; gap: 18px; flex-wrap: wrap; margin-top: 14px; font-size: 14px; color: var(--muted); }
+
+  /* title slide */
+  .title-slide { display: none; }
+  .title-slide.active { display: flex; flex-direction: column; justify-content: center; }
+  .title-slide h1 { font-size: 84px; margin-bottom: 18px; }
+  .title-slide .meta { display: flex; gap: 28px; margin-top: 40px; color: var(--muted); font-size: 15px; }
+  .title-slide .meta b { display: block; color: var(--ink); font-weight: 600; }
+  .verdict { align-self: flex-start; display: inline-flex; gap: 10px; align-items: center; margin-top: 30px; padding: 10px 16px; border: 1px solid var(--line); border-radius: var(--radius); background: var(--panel); font-size: 16px; }
+
+  /* exec summary */
+  .exec .card h3 { color: var(--blue); }
+  .exec .card { min-height: 170px; }
+  .asks li b { color: var(--ink); }
+
+  /* path to demo */
+  .path { display: grid; grid-template-columns: repeat(5, 1fr); gap: 0; margin-top: 30px; position: relative; }
+  .path::before { content: ""; position: absolute; left: 0; right: 0; top: 19px; height: 2px; background: var(--line); }
+  .stage { position: relative; padding: 0 16px 0 0; }
+  .stage .dot { width: 40px; height: 40px; border-radius: 50%; display: grid; place-items: center; background: var(--panel); border: 2px solid var(--line); font: 700 14px var(--mono); color: var(--muted); position: relative; z-index: 1; }
+  .stage.now .dot { border-color: var(--amber); color: var(--amber); }
+  .stage.goal .dot { background: var(--blue); border-color: var(--blue); color: var(--bg); }
+  .stage h4 { margin: 14px 0 4px; font-size: 17px; }
+  .stage .who { font: 600 12px var(--mono); color: var(--blue); text-transform: uppercase; letter-spacing: .08em; }
+  .stage p { font-size: 15px; color: var(--muted); margin-top: 6px; }
+
+  /* appendix divider */
+  .divider.active { display: flex; flex-direction: column; justify-content: center; }
+  .divider ol { display: grid; grid-template-rows: repeat(5, auto); grid-auto-flow: column; column-gap: 60px; max-width: 1100px; font-size: 20px; padding-left: 0; list-style: none; margin-top: 20px; }
+  .divider li { margin: 10px 0; cursor: pointer; }
+  .divider li span { font: 700 14px var(--mono); color: var(--blue); margin-right: 12px; }
+  .divider li:hover { color: var(--blue); }
+
+  /* footer on every slide */
+  .footer { position: absolute; left: 80px; right: 80px; bottom: 72px; display: flex; justify-content: center; font: 12px var(--mono); color: var(--soft); border-top: 1px solid var(--line); padding-top: 10px; }
+
+  /* speaker notes (hidden; N shows them) */
+  aside.notes { display: none; }
+  .notes-panel { display: none; position: fixed; left: 24px; right: 24px; bottom: 60px; max-height: 32vh; overflow: auto; background: var(--panel); border: 1px solid var(--line); border-radius: var(--radius); padding: 14px 18px; z-index: 12; font-size: 15px; }
+  .notes-panel.open { display: block; }
+  .notes-panel h5 { margin: 0 0 6px; font: 600 11px var(--mono); text-transform: uppercase; letter-spacing: .12em; color: var(--muted); }
+
+  /* ---------- top bar: title, search, theme ---------- */
+  .topbar { position: fixed; top: 0; left: 0; right: 0; height: 52px; display: flex; align-items: center; gap: 12px; padding: 0 24px; background: color-mix(in srgb, var(--bg) 90%, transparent); backdrop-filter: blur(8px); border-bottom: 1px solid var(--line); z-index: 14; font: 14px var(--sans); }
+  .topbar .brand { font-weight: 700; } .topbar .brand span { color: var(--muted); font-weight: 400; margin-left: 8px; }
+  .topbar .spacer { flex: 1; }
+  .search { position: relative; }
+  .search input { width: 340px; background: var(--panel); color: var(--ink); border: 1px solid var(--line); border-radius: 8px; padding: 7px 56px 7px 32px; font: inherit; }
+  .search input:focus { outline: 2px solid var(--blue); outline-offset: 1px; }
+  .search::before { content: "⌕"; position: absolute; left: 11px; top: 50%; transform: translateY(-52%); color: var(--muted); font-size: 16px; }
+  .search .scount { position: absolute; right: 10px; top: 50%; transform: translateY(-50%); font: 11px var(--mono); color: var(--muted); pointer-events: none; }
+  .sresults { display: none; position: absolute; right: 0; top: calc(100% + 6px); width: 480px; max-height: 60vh; overflow: auto; background: var(--panel); border: 1px solid var(--line); border-radius: var(--radius); padding: 6px; }
+  .sresults.open { display: block; }
+  .sresults button { display: block; width: 100%; text-align: left; background: none; border: 0; color: var(--ink); padding: 7px 10px; border-radius: 6px; cursor: pointer; font: inherit; }
+  .sresults button:hover, .sresults button.active { background: color-mix(in srgb, var(--blue) 12%, transparent); }
+  .sresults .where { font-size: 11px; color: var(--muted); text-transform: uppercase; letter-spacing: .06em; }
+  .sresults .snip { font-size: 13px; }
+  .sresults .empty { padding: 10px; color: var(--muted); }
+  .topbar select, .topbar button, .pager button { background: var(--panel); color: var(--ink); border: 1px solid var(--line); border-radius: 8px; padding: 6px 10px; font: inherit; cursor: pointer; }
+  /* The theme list is drawn by the browser: color-scheme matches its frame to the mode, and the options take the deck's colors */
+  [data-mode="light"] { color-scheme: light; } [data-mode="dark"] { color-scheme: dark; }
+  .topbar option { background: var(--panel); color: var(--ink); }
+  /* Where the browser lets the page draw the list (customizable select), draw it like the deck's other menus */
+  @supports (appearance: base-select) {
+    .topbar select, .topbar select::picker(select) { appearance: base-select; }
+    .topbar select { display: inline-flex; align-items: center; gap: 8px; }
+    .topbar select::picker-icon { color: var(--muted); }
+    .topbar select::picker(select) { background: var(--panel); color: var(--ink); border: 1px solid var(--hair); border-radius: 6px; padding: 4px; margin-top: 4px; box-shadow: 0 8px 24px rgba(0, 0, 0, .18); }
+    .topbar option { padding: 6px 10px; border-radius: 4px; background: transparent; color: var(--ink); cursor: pointer; }
+    .topbar option::checkmark { display: none; }
+    .topbar option:hover, .topbar option:focus-visible { background: color-mix(in srgb, var(--blue) 12%, transparent); outline: none; }
+    .topbar option:checked { color: var(--accent); font-weight: 600; }
+  }
+  .topbar button:hover, .pager button:hover:not(:disabled) { border-color: var(--blue); }
+  mark { background: color-mix(in srgb, var(--amber) 35%, transparent); color: inherit; border-radius: 3px; padding: 0 1px; }
+  mark.current { background: var(--amber); color: #000; }
+
+  /* ---------- bottom pager ---------- */
+  .pager { position: fixed; left: 0; right: 0; bottom: 0; height: 52px; display: flex; align-items: center; gap: 12px; padding: 0 24px; background: color-mix(in srgb, var(--bg) 90%, transparent); backdrop-filter: blur(8px); border-top: 1px solid var(--line); z-index: 13; font: 13px var(--sans); color: var(--muted); user-select: none; }
+  .pager button:disabled { opacity: .35; cursor: default; }
+  .segs { flex: 1; display: flex; gap: 3px; align-items: center; height: 22px; }
+  .seg { flex: 1; height: 6px; border-radius: 3px; background: var(--line); cursor: pointer; position: relative; transition: height .12s; }
+  .seg.appx { opacity: .55; }
+  .seg.done { background: color-mix(in srgb, var(--blue) 45%, transparent); }
+  .seg.cur { background: var(--blue); height: 10px; opacity: 1; }
+  .seg:hover { height: 12px; background: var(--blue); }
+  .seg .tip { display: none; position: absolute; bottom: 18px; left: 50%; transform: translateX(-50%); white-space: nowrap; background: var(--panel); color: var(--ink); border: 1px solid var(--line); border-radius: 6px; padding: 4px 8px; font-size: 12px; pointer-events: none; }
+  .seg:first-child .tip { left: 0; transform: none; } .seg:last-child .tip { left: auto; right: 0; transform: none; }
+  .seg:hover .tip { display: block; }
+  .count { font-family: var(--mono); cursor: pointer; }
+  .toc { display: none; position: fixed; inset: 0; background: rgba(5,10,18,.55); z-index: 20; align-items: center; justify-content: center; }
+  .toc.open { display: flex; }
+  .toc .box { background: var(--panel); border: 1px solid var(--line); border-radius: var(--radius); padding: 20px 24px; width: min(760px, 92vw); max-height: 80vh; overflow: auto; }
+  .toc h4 { margin: 14px 0 6px; font: 600 11px var(--mono); text-transform: uppercase; letter-spacing: .14em; color: var(--muted); }
+  .toc ol { list-style: none; margin: 0; padding: 0; }
+  .toc li { display: flex; gap: 12px; padding: 7px 10px; border-radius: 6px; cursor: pointer; }
+  .toc li .n { font-family: var(--mono); color: var(--muted); min-width: 28px; text-align: right; }
+  .toc li:hover, .toc li.cur { background: color-mix(in srgb, var(--blue) 12%, transparent); }
+  .toc .hint { margin-top: 14px; font-size: 12px; color: var(--muted); }
+
+  /* diagram follows the theme */
+  .own-diagram text[font-family*="monospace"] { font-family: var(--mono); }
+
+  /* ---------- design language (diagram-design editorial grammar, all themes) ---------- */
+  :root { --hair: color-mix(in srgb, var(--ink) 12%, transparent); --edge: color-mix(in srgb, var(--ink) 78%, transparent); }
+  h1, h2 { font-weight: var(--head-weight); }
+  :root:not([data-theme="editorial"]) h1, :root:not([data-theme="editorial"]) h2 { font-weight: 600; letter-spacing: -0.025em; }
+  .kicker { font: 500 11px var(--mono); letter-spacing: .18em; color: var(--soft); }
+  h3 { font: 500 11px var(--mono); letter-spacing: .16em; color: var(--soft); }
+  .card { background: var(--panel); border: 1px solid var(--edge); border-radius: 6px; }
+  [data-mode="dark"] .card { border-color: color-mix(in srgb, var(--ink) 45%, transparent); }
+  .exec .card h3 { color: var(--accent); }
+  table { font-size: 15.5px; }
+  th { font: 500 10.5px var(--mono); letter-spacing: .14em; color: var(--soft); border-bottom: 1px solid var(--edge); }
+  td { border-bottom: 1px solid var(--hair); }
+  .num { color: var(--accent); font-weight: 500; }
+  code { border-color: var(--hair); border-radius: 2px; }
+  pre { border-color: var(--hair); border-radius: 6px; }
+  .st { font: 500 10px var(--mono); text-transform: uppercase; letter-spacing: .1em; padding: 2px 7px; border-radius: 2px; background: transparent !important; border: 1px solid color-mix(in srgb, currentColor 55%, transparent); }
+  .callout { border-left-width: 2px; background: color-mix(in srgb, var(--ink) 3%, transparent); border-left-color: var(--accent); border-radius: 0; }
+  .callout.warn { border-left-color: var(--accent); background: color-mix(in srgb, var(--accent) 6%, transparent); }
+  .verdict { border: 1px solid var(--edge); border-radius: 6px; }
+  .footer { border-top-color: var(--hair); }
+  .topbar, .pager { border-color: var(--hair); }
+  .topbar select, .topbar button, .pager button, .search input { border-radius: 6px; border-color: var(--hair); }
+  .stage .dot { border-radius: 4px; border: 1px solid var(--edge); width: 26px; height: 26px; font: 500 12px var(--mono); margin-bottom: 12px; }
+  .stage.now .dot { border-color: var(--accent); color: var(--accent); background: color-mix(in srgb, var(--accent) 8%, var(--panel)); }
+  .stage.goal .dot { background: var(--panel); border-color: var(--edge); color: var(--ink); }
+  .path::before { top: 13px; height: 1px; background: var(--edge); opacity: .35; }
+  .stage .who { color: var(--soft); font-weight: 500; letter-spacing: .14em; }
+  .divider li span { color: var(--accent); }
+  .seg { height: 4px; } .seg.cur { height: 8px; }
+  .seg.cur, .seg:hover { background: var(--accent); } .seg.done { background: color-mix(in srgb, var(--accent) 40%, transparent); }
+
+  table.compact { font-size: 14.5px; } table.compact td, table.compact th { padding: 7px 10px; }
+  .cgrid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-top: 20px; }
+  .concepts .card p { font-size: 16px; }
+  .concepts .card h3 { color: var(--accent); }
+
+  /* alignment deck */
+  .kpis { display: grid; grid-template-columns: repeat(2, minmax(0, 340px)); gap: 16px; margin: 34px 0 26px; }
+  .kpi { border: 1px solid var(--edge); border-radius: 6px; padding: 16px 18px; background: var(--panel); }
+  .kpi .v { font: 600 34px/1.1 var(--head); letter-spacing: -0.02em; }
+  .kpi .k { font: 500 10.5px var(--mono); letter-spacing: .14em; text-transform: uppercase; color: var(--soft); margin-top: 8px; }
+  .agenda { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 6px; }
+  .agenda a { font: 500 11px var(--mono); letter-spacing: .12em; text-transform: uppercase; color: var(--ink); border: 1px solid var(--hair); border-radius: 2px; padding: 5px 10px; cursor: pointer; text-decoration: none; }
+  .agenda a:hover { border-color: var(--accent); color: var(--accent); }
+  .g4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; margin-top: 18px; }
+  .g4 .card p { font-size: 15px; margin: 0; }
+  .g4 .card h3 { color: var(--accent); }
+  .g4 .card { position: relative; }
+  .owner { position: absolute; top: 14px; right: 14px; font: 500 9.5px var(--mono); letter-spacing: .1em; text-transform: uppercase; padding: 2px 6px; border-radius: 2px; border: 1px solid color-mix(in srgb, currentColor 50%, transparent); color: var(--soft); }
+  .owner.t1 { color: var(--link); } .owner.t2 { color: var(--green); } .owner.t3 { color: var(--violet); } .owner.t4 { color: var(--amber); }
+  .changes li { margin: 8px 0; } .changes .was { color: var(--soft); text-decoration: line-through; }
+  .g4 .card h3 { padding-right: 84px; }
+  .st.ok { color: var(--green); } .st.risk { color: var(--amber); } .st.off { color: var(--red); }
+  .wins li::marker { color: var(--green); }
+  .dd .life { stroke: color-mix(in srgb, var(--ink) 22%, transparent); stroke-width: 1; stroke-dasharray: 3 3; }
+  .dd .act { fill: color-mix(in srgb, var(--ink) 6%, var(--bg)); stroke: var(--muted); stroke-width: .8; }
+  .dd .arrow.ret { stroke-dasharray: 4 3; }
+  .dd .node.decision { stroke-dasharray: 4 3; stroke: color-mix(in srgb, var(--ink) 60%, transparent); }
+  /* solution diagram: classes resolve against the active theme */
+  .dd .paper, .dd .zl-bg, .dd .lbl-bg, .dd .mask { fill: var(--bg); }
+  .dd .zone { fill: color-mix(in srgb, var(--ink) 2.5%, transparent); stroke: color-mix(in srgb, var(--ink) 12%, transparent); stroke-width: .8; }
+  .dd .zl { fill: var(--soft); font: 500 7.5px var(--mono); letter-spacing: .14em; }
+  .dd .node { fill: var(--panel); stroke: var(--ink); stroke-width: 1.2; }
+  .dd .node.ext { fill: color-mix(in srgb, var(--ink) 4%, var(--bg)); stroke: color-mix(in srgb, var(--ink) 35%, transparent); }
+  .dd .node.store { fill: color-mix(in srgb, var(--ink) 5%, var(--bg)); stroke: color-mix(in srgb, var(--ink) 45%, transparent); }
+  .dd .node.focal { fill: color-mix(in srgb, var(--accent) 9%, var(--bg)); stroke: var(--accent); }
+  .dd .tag { fill: none; stroke: color-mix(in srgb, var(--ink) 45%, transparent); stroke-width: .8; }
+  .dd .tagt { fill: var(--muted); font: 500 7px var(--mono); letter-spacing: .08em; }
+  .dd .name { fill: var(--ink); font: 600 13px var(--sans); }
+  .dd .sub { fill: var(--muted); font: 9.5px var(--mono); }
+  .dd .arrow { fill: none; stroke: var(--muted); stroke-width: 1.2; }
+  .dd .arrow.accent { stroke: var(--accent); } .dd .arrow.link { stroke: var(--link); }
+  .dd .arrow.blocked { stroke: var(--ink); stroke-dasharray: 1.5 3; }
+  .dd .blocked-end { stroke: var(--ink); stroke-width: 2; }
+  .dd .lbl { fill: var(--muted); font: 500 8px var(--mono); letter-spacing: .08em; } .dd .lbl.accent { fill: var(--accent); }
+  .dd .rule { stroke: var(--hair); }
+  .dd .stage-hd { fill: none; }
+  .dd .cell { stroke-width: 1; }
+  .dd .cell.front { fill: var(--panel); stroke: var(--ink); }
+  .dd .cell.back { fill: color-mix(in srgb, var(--ink) 6%, var(--bg)); stroke: color-mix(in srgb, var(--ink) 30%, transparent); }
+  .dd .cell.focal { fill: color-mix(in srgb, var(--accent) 12%, var(--bg)); stroke: var(--accent); }
+  .dd .cell.empty { stroke-dasharray: 3 3; }
+  .dd .cname { fill: var(--ink); font: 600 12px var(--sans); } .dd .cname.accent { fill: var(--accent); }
+  .dd .cname.muted { fill: var(--muted); font-weight: 400; }
+  .dd .vis { stroke: color-mix(in srgb, var(--ink) 55%, transparent); stroke-width: 2; }
+  .dd .hair { stroke: var(--hair); stroke-width: 1; }
+  .dd .m-muted { fill: var(--muted); } .dd .m-accent { fill: var(--accent); } .dd .m-link { fill: var(--link); }
+  [data-theme="catppuccin"] .dd .name { font-family: var(--sans); }
+
+  /* ---------- theme personalities ---------- */
+  [data-theme="editorial"] h1 { font-size: 66px; } [data-theme="editorial"] h2 { font-size: 44px; letter-spacing: -0.01em; }
+  [data-theme="editorial"] .title-slide h1 { font-size: 104px; }
+  [data-theme="editorial"] .lede { font-family: var(--head); font-style: italic; font-size: 28px; line-height: 1.3; }
+  [data-theme="editorial"] .kicker { color: var(--muted); letter-spacing: .22em; font-weight: 500; }
+  [data-theme="editorial"] .card { background: transparent; border: 0; border-top: 2px solid var(--ink); border-radius: 0; padding: 14px 0 0; }
+  [data-theme="editorial"] .exec .card h3 { color: var(--blue); }
+  [data-theme="catppuccin"] .kicker { color: var(--violet); }
+  [data-theme="catppuccin"] code { color: var(--pink); border-color: transparent; }
+  [data-theme="catppuccin"] th { color: var(--violet); }
+  [data-theme="catppuccin"] .title-slide h1::after { content: ""; display: block; width: 140px; height: 6px; margin-top: 18px; border-radius: 3px; background: linear-gradient(90deg, var(--violet), var(--blue), var(--teal), var(--green), var(--peach)); }
+  [data-theme="catppuccin"] .exec .card:nth-child(1) { border-top: 3px solid var(--violet); } [data-theme="catppuccin"] .exec .card:nth-child(2) { border-top: 3px solid var(--blue); }
+  [data-theme="catppuccin"] .exec .card:nth-child(3) { border-top: 3px solid var(--teal); } [data-theme="catppuccin"] .exec .card:nth-child(4) { border-top: 3px solid var(--peach); }
+
+  @media (max-width: 1300px) { .topbar .brand span { display: none; } .search input { width: 240px; } }
+  @media print {
+    .topbar, .pager, .toc, .notes-panel { display: none !important; }
+    .slide, .title-slide, .divider { display: block !important; min-height: auto; page-break-after: always; padding: 40px 60px 80px; }
+    .footer { bottom: 20px; }
+  }
+  /* PDF / print: one 1440×900 page per slide, colors kept */
+  @media print {
+    @page { size: 1440px 900px; margin: 0; }
+    html, body { height: auto; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+    .slide { display: block !important; height: 900px; min-height: 900px; max-width: none; margin: 0; padding: 56px 80px 80px; overflow: hidden; break-after: page; page-break-after: always; }
+    .title-slide, .divider { display: flex !important; flex-direction: column; justify-content: center; }
+    .footer { bottom: 32px; }
+    mark, mark.current { background: none; color: inherit; }
+  }
+  /* edit mode */
+  .topbar .edit-only { display: none; }
+  body.editing .topbar .edit-only { display: inline-block; }
+  body.editing #editbtn { border-color: var(--accent); color: var(--accent); }
+  body.editing [contenteditable="true"] { outline: 1px dashed color-mix(in srgb, var(--accent) 45%, transparent); outline-offset: 3px; border-radius: 2px; cursor: text; }
+  body.editing [contenteditable="true"]:focus { outline: 1.5px solid var(--accent); background: color-mix(in srgb, var(--accent) 5%, transparent); }
+  body.editing .dd text { cursor: text; }
+  body.editing .dd text:hover { fill: var(--accent); }
+  .toast { display: none; position: fixed; left: 50%; bottom: 68px; transform: translateX(-50%); background: var(--panel); color: var(--ink); border: 1px solid var(--edge); border-radius: 6px; padding: 8px 14px; font-size: 14px; z-index: 30; }
+  .toast.show { display: block; }
+  @media print { .toast { display: none !important; } }
+</style>
+</head>
+<body>
+<script>
+  // A timeline for the D diagnostics panel, for viewers where developer tools aren't available
+  const deckgenLog = [], dglog = m => { deckgenLog.push(`${Math.round(performance.now())}ms ${m}`); if (deckgenLog.length > 40) deckgenLog.shift(); };
+  (function () {
+    const p = new URLSearchParams(location.search), get = k => { try { return localStorage.getItem(k); } catch (e) { return null; } };
+    const t = p.get('theme') || get('deckgen-theme');
+    const root = document.documentElement;
+    root.dataset.theme = ['midnight', 'editorial', 'catppuccin'].includes(t) ? t : '{{THEME}}';
+    // Only light and dark count: hosts add their own query params (Slack's file preview adds ?mode=raw)
+    const modes = ['light', 'dark'], m = [p.get('mode'), get('deckgen-mode')].find(x => modes.includes(x));
+    root.dataset.mode = m || (matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+    dglog(`start ${root.dataset.theme}/${root.dataset.mode} (url theme=${p.get('theme')}, mode=${p.get('mode')})`);
+  })();
+</script>
+
+<header class="topbar">
+  <span class="brand">{{BRAND}}<span>{{SUBTITLE}}</span></span>
+  <span class="spacer"></span>
+  <div class="search">
+    <input id="sq" type="search" placeholder="Search all slides  ( / )" autocomplete="off" aria-label="Search all slides">
+    <span class="scount" id="scount"></span>
+    <div class="sresults" id="sresults" role="listbox"></div>
+  </div>
+  <button id="editbtn" title="Edit text (E)">Edit</button>
+  <button id="savebtn" class="edit-only" title="Save the deck and its YAML spec (Ctrl/Cmd+S)">Save</button>
+  <select id="theme" title="Theme (T)" aria-label="Theme"><option value="midnight">Midnight</option><option value="editorial">Editorial</option><option value="catppuccin">Catppuccin</option></select>
+  <button id="mode" title="Light / dark (M)">◐ Dark</button>
+</header>
+
+{{SLIDES}}
+<!-- ================= CHROME ================= -->
+<div class="toast" id="toast" role="status"></div>
+<div class="notes-panel" id="notes"><h5>Speaker notes</h5><div id="notes-body"></div></div>
+<div class="pager">
+  <button id="prev" title="Previous (←)">←</button>
+  <div class="segs" id="segs"></div>
+  <span class="count" id="count" title="All slides (G)"></span>
+  <button id="notesbtn" title="Speaker notes (N)">Notes</button>
+  <button id="tocbtn" title="All slides (G)">☰</button>
+  <button id="next" title="Next (→)">→</button>
+</div>
+<div class="toc" id="toc"><div class="box"><div id="toclist"></div><div class="hint">← → or Space to move · G slide list · / search (↑ ↓ pick, Enter go) · N notes · E edit · T theme · M light/dark · number + Enter to jump · P print · Esc close</div></div></div>
+
+<script type="application/json" id="deckgen-spec">{{SPEC}}</script>
+<script>
+  const slides = [...document.querySelectorAll('.slide')];
+  // Spec text as rendered, keyed by data-src path, read before a draft is restored: Save writes the fields that differ
+  const mdOf = node => [...node.childNodes].map(c => {
+    if (c.nodeType === 3) return c.nodeValue;
+    if (c.nodeType !== 1) return '';
+    const t = c.tagName.toLowerCase(), inner = mdOf(c), href = c.getAttribute('href') || '';
+    if (t === 'b' || t === 'strong') return inner.trim() ? `**${inner}**` : inner;
+    if (t === 'code') return '`' + c.textContent + '`';
+    if (t === 'a' && /^https?:\/\//.test(href)) return `[${inner}](${href})`;
+    if (['br', 'div', 'p'].includes(t)) return ' ' + inner;
+    return inner;
+  }).join('');
+  const srcPath = el => { const base = el.closest('[data-src-base]'); return el.closest('svg') ? (base ? base.dataset.srcBase + '/' + el.dataset.src : null) : el.dataset.src; };
+  function srcText(el) {
+    const s = (el.closest('svg') ? el.textContent : mdOf(el)).replace(/\s+/g, ' ').trim();
+    return el.hasAttribute('data-bold') ? s.replace(/^\*\*([\s\S]*)\*\*$/, '$1') : s;
+  }
+  const srcFields = () => [...document.querySelectorAll('.slide [data-src]')].map(el => [srcPath(el), el]).filter(([p]) => p);
+  const baseline = new Map(srcFields().map(([p, el]) => [p, srcText(el)]));
+  const DRAFT_KEY = 'deckgen-draft:' + location.pathname;
+  try {
+    const draft = JSON.parse(localStorage.getItem(DRAFT_KEY) || 'null');
+    if (draft && Array.isArray(draft.slides) && draft.slides.length === slides.length &&
+        confirm(`Restore unsaved edits from ${new Date(draft.at).toLocaleString()}? Cancel discards them.`)) {
+      draft.slides.forEach((html, n) => { slides[n].innerHTML = html; });
+    } else if (draft) {
+      localStorage.removeItem(DRAFT_KEY);
+    }
+  } catch (e) {}
+  const titleOf = s => s.dataset.title || (s.querySelector('h1, h2')?.textContent || '').replace(/\s+/g, ' ').trim();
+
+  // Appendix index, segments, slide list
+  const appxIndex = document.getElementById('appx-index');
+  slides.forEach((s, n) => { if (!s.dataset.appx) return; const li = document.createElement('li'); li.innerHTML = `<span>${s.dataset.appx}</span>`; li.append(titleOf(s).replace(/^.*$/, s.querySelector('.kicker').textContent.split('·')[1].trim())); li.onclick = () => goTo(n); appxIndex.appendChild(li); });
+  const segs = document.getElementById('segs'), toclist = document.getElementById('toclist'), toc = document.getElementById('toc');
+  let lastSection = null, ol;
+  slides.forEach((s, n) => {
+    const seg = document.createElement('div'); seg.className = 'seg' + (s.dataset.section === 'appendix' ? ' appx' : '');
+    seg.innerHTML = '<span class="tip"></span>'; seg.querySelector('.tip').textContent = `${n + 1}. ${titleOf(s)}`;
+    seg.onclick = () => goTo(n); segs.appendChild(seg);
+    if (s.dataset.section !== lastSection) { const h = document.createElement('h4'); h.textContent = s.dataset.section === 'main' ? 'Main deck' : 'Appendix'; toclist.appendChild(h); ol = document.createElement('ol'); toclist.appendChild(ol); lastSection = s.dataset.section; }
+    const li = document.createElement('li'); li.innerHTML = `<span class="n">${n + 1}</span><span></span>`; li.lastChild.textContent = titleOf(s);
+    li.onclick = () => { goTo(n); toc.classList.remove('open'); }; ol.appendChild(li);
+  });
+
+  // Navigation
+  let i = Math.max(0, Math.min(slides.length - 1, (parseInt(location.hash.slice(1), 10) || 1) - 1));
+  const notes = document.getElementById('notes'), notesBody = document.getElementById('notes-body');
+  function show() {
+    slides.forEach((s, n) => s.classList.toggle('active', n === i));
+    [...segs.children].forEach((g, n) => { g.classList.toggle('cur', n === i); g.classList.toggle('done', n < i); });
+    [...toclist.querySelectorAll('li')].forEach((li, n) => li.classList.toggle('cur', n === i));
+    document.getElementById('count').textContent = `${i + 1} / ${slides.length}`;
+    document.getElementById('prev').disabled = i === 0;
+    document.getElementById('next').disabled = i === slides.length - 1;
+    const aside = slides[i].querySelector('aside.notes');
+    notesBody.textContent = aside ? aside.textContent.trim() : 'No notes for this slide.';
+    history.replaceState(null, '', location.search + `#${i + 1}`);
+    window.scrollTo(0, 0);
+  }
+  function goTo(n) { i = Math.max(0, Math.min(slides.length - 1, n)); show(); }
+  const go = d => goTo(i + d);
+  document.getElementById('prev').onclick = () => go(-1);
+  document.getElementById('next').onclick = () => go(1);
+  document.getElementById('count').onclick = document.getElementById('tocbtn').onclick = () => toc.classList.add('open');
+  toc.onclick = e => { if (e.target === toc) toc.classList.remove('open'); };
+  const save = (k, v) => { try { localStorage.setItem(k, v); } catch (e) {} };
+  function toggleNotes() { notes.classList.toggle('open'); save('deckgen-notes', notes.classList.contains('open') ? '1' : '0'); }
+  document.getElementById('notesbtn').onclick = toggleNotes;
+  try { if (localStorage.getItem('deckgen-notes') === '1') notes.classList.add('open'); } catch (e) {}
+
+  // Theme and mode
+  const themeSel = document.getElementById('theme'), modeBtn = document.getElementById('mode');
+  function applyTheme(t) { document.documentElement.dataset.theme = t; dglog(`theme ${t}`); themeSel.value = t; save('deckgen-theme', t); }
+  function applyMode(m) { document.documentElement.dataset.mode = m; dglog(`mode ${m}`); modeBtn.textContent = m === 'dark' ? '◐ Dark' : '◑ Light'; save('deckgen-mode', m); }
+  const toggleMode = () => applyMode(document.documentElement.dataset.mode === 'dark' ? 'light' : 'dark');
+  const cycleTheme = () => { const o = [...themeSel.options].map(x => x.value); applyTheme(o[(o.indexOf(themeSel.value) + 1) % o.length]); };
+  // Blur after picking so the deck's shortcuts (/ search, arrows) work again; deferred because closing the list refocuses it
+  themeSel.onchange = () => { applyTheme(themeSel.value); setTimeout(() => themeSel.blur()); };
+  modeBtn.onclick = toggleMode;
+  applyTheme(document.documentElement.dataset.theme); applyMode(document.documentElement.dataset.mode);
+
+  // Search across all slides (skips diagrams, notes and footers)
+  const sq = document.getElementById('sq'), sres = document.getElementById('sresults'), scount = document.getElementById('scount');
+  let marks = [], mcur = -1, rsel = -1;
+  function clearMarks() { document.querySelectorAll('mark').forEach(m => { const t = document.createTextNode(m.textContent), p = m.parentNode; m.replaceWith(t); p.normalize(); }); marks = []; mcur = -1; }
+  function runSearch(term) {
+    clearMarks();
+    if (term.length < 2) { sres.classList.remove('open'); scount.textContent = ''; return; }
+    const re = new RegExp(term.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'gi');
+    slides.forEach((slide, n) => {
+      const walker = document.createTreeWalker(slide, NodeFilter.SHOW_TEXT, { acceptNode: x => x.parentElement.closest('svg, aside, .footer') ? NodeFilter.FILTER_REJECT : NodeFilter.FILTER_ACCEPT });
+      const nodes = []; while (walker.nextNode()) nodes.push(walker.currentNode);
+      nodes.forEach(node => {
+        const text = node.nodeValue; re.lastIndex = 0;
+        if (!re.test(text)) return;
+        re.lastIndex = 0;
+        const frag = document.createDocumentFragment(); let last = 0, m;
+        while ((m = re.exec(text))) { frag.append(text.slice(last, m.index)); const mk = document.createElement('mark'); mk.textContent = m[0]; mk.dataset.slide = n; frag.append(mk); marks.push(mk); last = m.index + m[0].length; }
+        frag.append(text.slice(last)); node.replaceWith(frag);
+      });
+    });
+    scount.textContent = String(marks.length);
+    rsel = -1;
+    sres.innerHTML = marks.length ? '' : '<div class="empty">No matches</div>';
+    marks.slice(0, 80).forEach((mk, k) => {
+      const ctx = (mk.closest('td, p, li, h1, h2, h3, h4, pre, .callout') || mk.parentElement).textContent.replace(/\s+/g, ' ').trim();
+      const at = ctx.toLowerCase().indexOf(term.toLowerCase());
+      const b = document.createElement('button'); b.innerHTML = '<div class="where"></div><div class="snip"></div>';
+      b.querySelector('.where').textContent = `${+mk.dataset.slide + 1}. ${titleOf(slides[+mk.dataset.slide])}`;
+      b.querySelector('.snip').textContent = (at > 40 ? '…' + ctx.slice(at - 40) : ctx).slice(0, 120);
+      b.onclick = () => { focusMark(k); sres.classList.remove('open'); }; sres.appendChild(b);
+    });
+    sres.classList.add('open');
+  }
+  function focusMark(k) {
+    if (!marks.length) return;
+    mcur = (k + marks.length) % marks.length;
+    goTo(+marks[mcur].dataset.slide);
+    marks.forEach((m, j) => m.classList.toggle('current', j === mcur));
+    rsel = mcur;
+    [...sres.querySelectorAll('button')].forEach((b, j) => b.classList.toggle('active', j === mcur));
+    marks[mcur].scrollIntoView({ block: 'center' });
+    scount.textContent = `${mcur + 1}/${marks.length}`;
+  }
+  let st; sq.addEventListener('input', () => { clearTimeout(st); st = setTimeout(() => runSearch(sq.value.trim()), 150); });
+  // Up and down pick a result, Enter goes to it and closes the list; with the list closed, Enter and Shift+Enter step through matches
+  function selectResult(k) {
+    const bs = [...sres.querySelectorAll('button')]; if (!bs.length) return;
+    sres.classList.add('open'); rsel = (k + bs.length) % bs.length;
+    bs.forEach((b, j) => b.classList.toggle('active', j === rsel)); bs[rsel].scrollIntoView({ block: 'nearest' });
+  }
+  sq.addEventListener('keydown', e => {
+    if (e.key === 'ArrowDown' || e.key === 'ArrowUp') { e.preventDefault(); selectResult(rsel + (e.key === 'ArrowDown' ? 1 : -1)); }
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      if (sres.classList.contains('open') && marks.length) { focusMark(rsel >= 0 ? rsel : 0); sres.classList.remove('open'); } else focusMark(mcur + (e.shiftKey ? -1 : 1));
+    }
+    if (e.key === 'Escape') { e.preventDefault(); sq.value = ''; runSearch(''); sq.blur(); }
+  });
+  sq.addEventListener('focus', () => { if (sq.value.trim().length > 1) sres.classList.add('open'); });
+  document.addEventListener('click', e => { if (!e.target.closest('.search')) sres.classList.remove('open'); });
+
+  // D: what the page sees, for debugging viewers that restyle the deck (drawn with fixed colors, not theme tokens)
+  function toggleDiagnostics() {
+    const old = document.getElementById('deckgen-diag'); if (old) return old.remove();
+    const root = document.documentElement, slide = document.querySelector('.slide.active') || document.querySelector('.slide');
+    const prop = (el, k) => el ? getComputedStyle(el).getPropertyValue(k).trim() || '(none)' : '(no element)';
+    const sheets = [...document.styleSheets].map(sh => {
+      try {
+        const rules = [...sh.cssRules], themed = rules.filter(r => /data-theme/.test(r.selectorText || ''));
+        return { href: sh.href || 'inline', owner: sh.ownerNode?.id || sh.ownerNode?.nodeName, rules: rules.length, firstSelectors: rules.slice(0, 3).map(r => r.selectorText), themedRules: themed.length, themedSample: themed.slice(0, 2).map(r => r.selectorText) };
+      } catch (e) { return { href: sh.href || 'inline', error: String(e) }; }
+    });
+    let inFrame; try { inFrame = window !== top; } catch (e) { inFrame = 'cross-origin frame'; }
+    const report = {
+      href: location.href.slice(0, 120), inFrame, readyState: document.readyState, userAgent: navigator.userAgent,
+      htmlTag: root.outerHTML.slice(0, root.outerHTML.indexOf('>') + 1).slice(0, 300),
+      bodyTag: document.body.outerHTML.slice(0, document.body.outerHTML.indexOf('>') + 1).slice(0, 300),
+      look: { theme: root.dataset.theme, mode: root.dataset.mode }, matchesThemeRule: root.matches(`[data-theme="${root.dataset.theme}"][data-mode="${root.dataset.mode}"]`),
+      bg: { html: prop(root, '--bg'), body: prop(document.body, '--bg'), slide: prop(slide, '--bg') },
+      paint: { htmlBackground: getComputedStyle(root).backgroundColor, slideColor: slide ? getComputedStyle(slide).color : null },
+      cssSupports: { customProps: CSS.supports('--x: 1'), colorMix: CSS.supports('color', 'color-mix(in srgb, red 50%, blue)') },
+      sheets, log: deckgenLog,
+    };
+    const box = document.createElement('pre'); box.id = 'deckgen-diag';
+    box.setAttribute('style', 'position:fixed;inset:60px 24px 60px auto;width:min(760px,90vw);overflow:auto;z-index:99;margin:0;padding:14px;background:#fff;color:#111;border:2px solid #c00;font:12px/1.4 monospace;white-space:pre-wrap;');
+    box.textContent = 'deckgen diagnostics (D or Esc closes; screenshot or copy this)\n\n' + JSON.stringify(report, null, 1);
+    document.body.appendChild(box);
+    try { navigator.clipboard?.writeText(box.textContent); } catch (e) { /* clipboard may be blocked in a sandbox */ }
+  }
+
+  // Keyboard
+  let typed = '';
+  document.addEventListener('keydown', e => {
+    if (e.target.matches('input, select, textarea') || e.target.isContentEditable) return;
+    if (/^[0-9]$/.test(e.key)) { typed += e.key; return; }
+    if (e.key === 'Enter' && typed) { goTo(parseInt(typed, 10) - 1); typed = ''; toc.classList.remove('open'); return; }
+    typed = '';
+    const k = e.key.toLowerCase();
+    if (k === 'e') return editBtn.click();
+    if (e.key === 'Escape') { toc.classList.remove('open'); notes.classList.remove('open'); sres.classList.remove('open'); document.getElementById('deckgen-diag')?.remove(); return; }
+    if (e.key === '/') { e.preventDefault(); return sq.focus(); }
+    if (k === 'g') return toc.classList.toggle('open');
+    if (k === 'n') return toggleNotes();
+    if (k === 't') return cycleTheme();
+    if (k === 'm') return toggleMode();
+    if (k === 'p') return window.print();
+    if (k === 'd') return toggleDiagnostics();
+    if (['ArrowRight', 'PageDown', ' '].includes(e.key)) { e.preventDefault(); go(1); }
+    if (['ArrowLeft', 'PageUp'].includes(e.key)) { e.preventDefault(); go(-1); }
+    if (e.key === 'Home') goTo(0);
+    if (e.key === 'End') goTo(slides.length - 1);
+  });
+  let x0 = null;
+  document.addEventListener('touchstart', e => { x0 = e.touches[0].clientX; });
+  document.addEventListener('touchend', e => { if (x0 === null) return; const dx = e.changedTouches[0].clientX - x0; if (Math.abs(dx) > 60) go(dx < 0 ? 1 : -1); x0 = null; });
+
+  document.querySelectorAll('.appx-link').forEach(a => a.onclick = e => { e.preventDefault(); if (document.body.classList.contains('editing')) return; goTo(slides.findIndex(x => x.dataset.appx === a.dataset.appxTarget)); });
+  document.querySelectorAll('[data-jump]').forEach(a => a.onclick = e => { e.preventDefault(); if (document.body.classList.contains('editing')) return; goTo(slides.findIndex(x => x.dataset.part === a.dataset.jump)); });
+
+  // ---- Edit mode ----
+  const EDITABLE = 'h1, h2, h3, h4, p, li, td, th, .kicker, .chip, .kpi .v, .kpi .k, .agenda a, .callout, .legend > span, .stage .who, .owner';
+  const editBtn = document.getElementById('editbtn'), saveBtn = document.getElementById('savebtn'), toastEl = document.getElementById('toast');
+  const isEditing = () => document.body.classList.contains('editing');
+  function toast(msg) { toastEl.textContent = msg; toastEl.classList.add('show'); clearTimeout(toastEl.timer); toastEl.timer = setTimeout(() => toastEl.classList.remove('show'), 3000); }
+  const editables = () => slides.flatMap(sl => [...sl.querySelectorAll(EDITABLE)].filter(el => !el.closest('svg, .footer, aside, #appx-index')));
+  function cleanSlide(section) {
+    const c = section.cloneNode(true);
+    c.querySelectorAll('.footer').forEach(x => x.remove());
+    c.querySelectorAll('#appx-index').forEach(x => { x.innerHTML = ''; });
+    c.querySelectorAll('mark').forEach(m => m.replaceWith(document.createTextNode(m.textContent)));
+    c.querySelectorAll('[contenteditable]').forEach(x => x.removeAttribute('contenteditable'));
+    c.normalize();
+    return c.innerHTML;
+  }
+  let draftTimer;
+  function saveDraft() {
+    clearTimeout(draftTimer);
+    draftTimer = setTimeout(() => { try { localStorage.setItem(DRAFT_KEY, JSON.stringify({ at: Date.now(), slides: slides.map(cleanSlide) })); } catch (e) {} }, 400);
+  }
+  function setEditing(on) {
+    if (on) { sq.value = ''; runSearch(''); }
+    document.body.classList.toggle('editing', on);
+    editBtn.textContent = on ? 'Done' : 'Edit';
+    editables().forEach(el => on ? el.setAttribute('contenteditable', 'true') : el.removeAttribute('contenteditable'));
+    notesBody.contentEditable = on ? 'true' : 'false';
+    if (on) toast('Editing: change any slides, click a diagram label to change it, then Ctrl/Cmd+S saves the deck and its YAML.');
+  }
+  editBtn.onclick = () => setEditing(!isEditing());
+  document.addEventListener('input', e => {
+    if (!isEditing()) return;
+    if (e.target === notesBody) {
+      let aside = slides[i].querySelector('aside.notes');
+      if (!aside) { aside = document.createElement('aside'); aside.className = 'notes'; slides[i].insertBefore(aside, slides[i].querySelector('.footer')); }
+      aside.textContent = notesBody.textContent;
+    }
+    saveDraft();
+  });
+  document.addEventListener('click', e => {
+    if (!isEditing()) return;
+    const t = e.target.closest('.dd text');
+    if (!t) return;
+    const v = prompt('Diagram label (long labels may outgrow their box)', t.textContent);
+    if (v !== null && v.trim()) { t.textContent = v.trim(); saveDraft(); }
+  });
+
+  // The spec with this session's edits applied, or null for decks rendered before deckgen embedded it
+  const specEl = document.getElementById('deckgen-spec');
+  function editedSpec() {
+    let spec; try { spec = JSON.parse(specEl?.textContent || ''); } catch (e) { return null; }
+    const skipped = [];
+    srcFields().forEach(([path, el]) => {
+      const v = srcText(el);
+      if (v === baseline.get(path)) return;
+      const keys = path.split('/').map(k => /^\d+$/.test(k) ? +k : k), last = keys.pop();
+      const parent = keys.reduce((o, k) => (o && typeof o === 'object' ? o[k] : undefined), spec);
+      if (parent && typeof parent === 'object') parent[last] = v; else skipped.push(path);
+    });
+    if (skipped.length) console.warn('deckgen: edits with no place in the spec', skipped);
+    return spec;
+  }
+  // A small YAML writer for spec data: block style, strings plain when that is unambiguous, otherwise JSON-quoted
+  const RESERVED = /^(y|n|yes|no|true|false|on|off|null|~)$/i;
+  const yamlKey = k => /^[A-Za-z_][\w-]*$/.test(k) && !RESERVED.test(k) ? k : JSON.stringify(k);
+  function yamlScalar(v) {
+    if (v === null || v === undefined) return 'null';
+    if (typeof v === 'number' || typeof v === 'boolean') return String(v);
+    if (Array.isArray(v)) return '[]';
+    if (typeof v === 'object') return '{}';
+    const s = String(v);
+    return /^[A-Za-z][\w ,.;'()/?!&+-]*$/.test(s) && !/\s$/.test(s) && !RESERVED.test(s) ? s : JSON.stringify(s);
+  }
+  const nested = v => v && typeof v === 'object' && Object.keys(v).length > 0;
+  function yamlBlock(v, ind) {
+    if (Array.isArray(v)) return v.map(x => nested(x) ? ind + '- ' + yamlBlock(x, ind + '  ').slice(ind.length + 2) : `${ind}- ${yamlScalar(x)}`).join('\n');
+    return Object.entries(v).map(([k, x]) => nested(x) ? `${ind}${yamlKey(k)}:\n${yamlBlock(x, ind + '  ')}` : `${ind}${yamlKey(k)}: ${yamlScalar(x)}`).join('\n');
+  }
+  const toYaml = spec => '# Saved from deckgen edit mode. Comments from the original spec are not kept.\n' + yamlBlock(spec, '') + '\n';
+
+  // Save: strip everything the page generates at runtime, so the file stays clean
+  function cleanDocument(spec) {
+    const doc = document.documentElement.cloneNode(true);
+    if (spec) doc.querySelector('#deckgen-spec').textContent = JSON.stringify(spec).replace(/</g, '\\u003c');
+    doc.querySelectorAll('.slide').forEach((sl, n) => { sl.innerHTML = cleanSlide(slides[n]); sl.classList.remove('active'); });
+    ['segs', 'toclist', 'appx-index', 'sresults', 'notes-body', 'toast'].forEach(id => { const el = doc.querySelector('#' + id); if (el) el.innerHTML = ''; });
+    ['count', 'scount'].forEach(id => { const el = doc.querySelector('#' + id); if (el) el.textContent = ''; });
+    doc.querySelectorAll('.open, .show').forEach(el => el.classList.remove('open', 'show'));
+    doc.querySelectorAll('[contenteditable]').forEach(el => el.removeAttribute('contenteditable'));
+    const b = doc.querySelector('body');
+    b.removeAttribute('class');
+    doc.querySelector('#editbtn').textContent = 'Edit';
+    doc.querySelector('#mode').textContent = '◐ Dark';
+    return '<!DOCTYPE html>\n' + doc.outerHTML + '\n';
+  }
+  const fileName = decodeURIComponent(location.pathname.split('/').pop() || 'deck.html');
+  const yamlName = fileName.replace(/\.html?$/i, '') + '.yaml';
+  let dirHandle = null;
+  async function writeFile(dir, name, text) {
+    const w = await (await dir.getFileHandle(name, { create: true })).createWritable();
+    await w.write(text);
+    await w.close();
+  }
+  function download(name, text, type) {
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(new Blob([text], { type }));
+    a.download = name;
+    a.click();
+    setTimeout(() => URL.revokeObjectURL(a.href), 1000);
+  }
+  // Writes the deck and, next to it, the spec with the edits, so `deckgen render` can regenerate it
+  async function saveDeck() {
+    const spec = editedSpec(), html = cleanDocument(spec), files = [[fileName, html, 'text/html']];
+    if (spec) files.push([yamlName, toYaml(spec), 'text/yaml']);
+    const names = files.map(f => f[0]).join(' and ');
+    try {
+      if (window.showDirectoryPicker) {
+        dirHandle = dirHandle || await window.showDirectoryPicker({ id: 'deckgen', mode: 'readwrite' });
+        for (const [name, text] of files) await writeFile(dirHandle, name, text);
+        toast(`Saved ${names} in ${dirHandle.name}`);
+      } else {
+        files.forEach(([name, text, type]) => download(name, text, type));
+        toast(`Downloaded ${names}. Move them over the originals to keep the edits.`);
+      }
+      localStorage.removeItem(DRAFT_KEY);
+    } catch (e) {
+      if (e.name !== 'AbortError') toast('Save failed: ' + e.message);
+    }
+  }
+  saveBtn.onclick = saveDeck;
+  document.addEventListener('keydown', e => {
+    if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 's' && isEditing()) { e.preventDefault(); saveDeck(); }
+  });
+  show();
+  const q0 = new URLSearchParams(location.search).get('q');
+  if (q0) { sq.value = q0; runSearch(q0); focusMark(0); sres.classList.remove('open'); }
+</script>
+</body>
+</html>
