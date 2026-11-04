@@ -30,7 +30,7 @@ Changelog = "https://github.com/douglas/deckgen/blob/main/CHANGELOG.md"
 deckgen = "deckgen.cli:main"
 
 [build-system]
-requires = ["setuptools>=77"]  # SPDX license expressions (PEP 639)
+requires = ["setuptools>=84.2.1"]  # SPDX license expressions (PEP 639)
 build-backend = "setuptools.build_meta"
 
 [tool.setuptools.packages.find]
