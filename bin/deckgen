@@ -1,0 +1,5 @@
+#!/usr/bin/env bash
+# Render, check and export alignment decks from YAML specs. See deckgen/__main__.py.
+set -euo pipefail
+ROOT="$(cd "$(dirname "$(realpath "$0")")/.." && pwd)"
+PYTHONPATH="$ROOT/src${PYTHONPATH:+:$PYTHONPATH}" exec python3 -m deckgen "$@"
