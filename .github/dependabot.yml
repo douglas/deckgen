@@ -1,0 +1,13 @@
+# Keep the CI actions and the pinned dev tools (uv.lock) current, with one grouped PR each per month.
+version: 2
+updates:
+  - package-ecosystem: github-actions
+    directory: /
+    schedule: { interval: monthly }
+    groups:
+      actions: { patterns: ["*"] }
+  - package-ecosystem: uv
+    directory: /
+    schedule: { interval: monthly }
+    groups:
+      python: { patterns: ["*"] }
