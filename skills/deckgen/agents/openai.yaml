@@ -1,0 +1,5 @@
+interface:
+  display_name: deckgen
+  short_description: Write, check and render slide decks from YAML specs
+policy:
+  allow_implicit_invocation: true

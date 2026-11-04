@@ -1,0 +1,30 @@
+#!/usr/bin/env bash
+# Link deckgen's agent skills where Claude Code, Codex, OpenCode and Pi look for them.
+#
+#   bin/install-skills              for your user: ~/.agents/skills and ~/.claude/skills
+#   bin/install-skills DECKS_REPO   for one repo:  DECKS_REPO/.agents/skills and DECKS_REPO/.claude/skills
+#
+# Codex, OpenCode and Pi read .agents/skills; Claude Code reads .claude/skills. The links point into this
+# checkout, so `git pull` updates the skills. Existing links are replaced; anything else is left alone.
+set -euo pipefail
+
+src="$(cd "$(dirname "$(realpath "$0")")/../skills" && pwd)"
+base="${1:-$HOME}"
+[ -d "$base" ] || { echo "install-skills: $base is not a directory" >&2; exit 2; }
+
+status=0
+for dir in "$base/.agents/skills" "$base/.claude/skills"; do
+  mkdir -p "$dir"
+  for skill in "$src"/*/; do
+    name="$(basename "$skill")"
+    target="$dir/$name"
+    if [ -e "$target" ] && [ ! -L "$target" ]; then
+      echo "install-skills: skipping $target: it exists and is not a link" >&2
+      status=1
+      continue
+    fi
+    ln -sfn "${skill%/}" "$target"
+    echo "$target"
+  done
+done
+exit "$status"
