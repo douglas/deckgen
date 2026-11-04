@@ -1,5 +1,10 @@
 # Changelog
 
+## Unreleased
+
+### Docs
+- **Install steps for macOS and Arch Linux (including Omarchy)** in the README: packages, pointing deckgen at Chrome on macOS, a first render, updating, and troubleshooting.
+
 ## 0.1.0 (2026-11-04)
 
 First release.

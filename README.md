@@ -12,16 +12,101 @@ It was built for project alignment and architecture decks written by people and 
 
 ## Install
 
-Requires Python 3.11+. PDF export and snapshots also need a Chromium-family browser (Chromium or Google Chrome), and contact sheets need ImageMagick 7 (`magick`).
+deckgen needs Python 3.11 or later. [uv](https://docs.astral.sh/uv/) installs it as a command, and downloads a suitable Python if your system doesn't have one. `check` and `render` need nothing else. `pdf` and `snap` drive a headless Chromium-family browser (Chromium or Google Chrome), and `snap` builds contact sheets with ImageMagick 7 (`magick`).
+
+### macOS
+
+These steps use [Homebrew](https://brew.sh), on macOS 13 (Ventura) or later.
+
+1. **Install uv, ImageMagick and Google Chrome:**
+
+   ```
+   brew install uv imagemagick
+   brew install --cask google-chrome   # skip if Chrome is already in /Applications
+   ```
+
+2. **Install deckgen:**
+
+   ```
+   uv tool install git+https://github.com/douglas/deckgen@v0.1.0
+   uv tool update-shell                # puts ~/.local/bin on your PATH; open a new terminal after
+   deckgen --version
+   ```
+
+3. **Point deckgen at Chrome.** Apps in `/Applications` aren't on your `PATH`, so deckgen can't find Chrome by name. Create `~/.config/deckgen/config.toml`:
+
+   ```toml
+   chrome = "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome"
+   ```
+
+   Other Chromium-family browsers work the same way, such as Brave (`/Applications/Brave Browser.app/Contents/MacOS/Brave Browser`). For `bin/export-pdf`, set `DECKGEN_CHROME` to the path instead.
+
+4. **Try it** on the introduction deck:
+
+   ```
+   git clone https://github.com/douglas/deckgen ~/src/deckgen && cd ~/src/deckgen
+   deckgen render examples/guide.yaml -o /tmp/guide.html && open /tmp/guide.html
+   deckgen snap   examples/guide.yaml -o /tmp/guide.html --dir /tmp --themes midnight/light
+   deckgen pdf    examples/guide.yaml -o /tmp/guide.html && open /tmp/guide.pdf
+   ```
+
+   If macOS asks whether Chrome may run, allow it.
+
+### Arch Linux and Omarchy
+
+[Omarchy](https://omarchy.org) is built on Arch Linux, so the steps are the same. It already comes with Chromium.
+
+1. **Install uv, Chromium and ImageMagick** from the official repositories:
+
+   ```
+   sudo pacman -S --needed uv chromium imagemagick
+   ```
+
+   Arch's `imagemagick` is version 7, with `magick`. deckgen looks for `chromium`, `chromium-browser`, `google-chrome`, `google-chrome-stable` and `chrome` on your `PATH`, in that order. For another browser, such as Brave, set `chrome = "brave"` in the config.
+
+2. **Install deckgen:**
+
+   ```
+   uv tool install git+https://github.com/douglas/deckgen@v0.1.0
+   uv tool update-shell                # puts ~/.local/bin on your PATH; open a new terminal after
+   deckgen --version
+   ```
+
+3. **Try it** on the introduction deck:
+
+   ```
+   git clone https://github.com/douglas/deckgen ~/src/deckgen && cd ~/src/deckgen
+   deckgen render examples/guide.yaml -o /tmp/guide.html && xdg-open /tmp/guide.html
+   deckgen snap   examples/guide.yaml -o /tmp/guide.html --dir /tmp --themes midnight/light
+   deckgen pdf    examples/guide.yaml -o /tmp/guide.html && xdg-open /tmp/guide.pdf
+   ```
+
+   Headless Chromium needs no display, so `pdf` and `snap` also work over SSH, and on Wayland sessions such as Omarchy's Hyprland.
+
+### Other systems
+
+Install [uv](https://docs.astral.sh/uv/getting-started/installation/), then `uv tool install git+https://github.com/douglas/deckgen@v0.1.0` (or `pipx install` the same URL). Add a Chromium-family browser and ImageMagick 7 for `pdf` and `snap`, and set `chrome` in the config if the browser isn't on your `PATH`.
+
+### Updating and removing
 
 ```
-uv tool install git+https://github.com/douglas/deckgen   # or: pipx install git+https://github.com/douglas/deckgen
-deckgen --version
+uv tool install --force git+https://github.com/douglas/deckgen@<tag>   # move to another release
+uv tool uninstall deckgen
 ```
 
-From a checkout, `uv tool install --editable .` installs a `deckgen` that follows your edits, and `bin/deckgen` runs it without installing.
+Your config and decks stay where they are. To work on deckgen itself, run `uv tool install --editable .` in a clone, so `deckgen` follows your edits; `bin/deckgen` runs a clone without installing. To let your coding agent write decks, see [Agents](#agents).
 
-To let your coding agent write decks, install the skills from a checkout: `bin/install-skills`. See [Agents](#agents).
+### Troubleshooting
+
+| Message or symptom | Fix |
+|---|---|
+| `deckgen: command not found` | Run `uv tool update-shell` and open a new terminal, or add `~/.local/bin` to your `PATH`. |
+| `no Chromium-family browser found` | Install Chromium or Chrome. On macOS, set `chrome` in the config to the full path inside the `.app` (step 3). |
+| `contact sheets need ImageMagick 7` | macOS: `brew install imagemagick`. Arch: `sudo pacman -S imagemagick`. ImageMagick 6 has no `magick` command. |
+| `… did not finish within 120 seconds` | Check that the browser starts headless at all, for example `chromium --headless --dump-dom about:blank`, and close stuck instances. |
+| PDFs or snapshots use fallback fonts | Decks load their fonts from Google Fonts and fall back to system fonts offline. Export with a network connection for the intended look. |
+| `… does not exist; run deckgen render first` | `snap` screenshots the HTML that `render` last wrote. Render first, with the same `-o` if you used one. |
+| `bin/install-skills`: `realpath: command not found` | macOS before 13 has no `realpath`: update macOS, or `brew install coreutils`. |
 
 ## Quick start
 
@@ -119,9 +204,11 @@ deckgen ships skills for Claude Code, Codex, OpenCode and Pi:
 - **`deckgen`:** write, update, check, render and review any deck. Agents pick it up when you ask for a deck.
 - **`alignment-deck`:** draft an alignment or status deck from issues, PRs and notes, and its update editions. Invoke it by name.
 
+Link them from a clone; the links point into it, so `git pull` there updates them:
+
 ```
-bin/install-skills               # for your user
-bin/install-skills ~/decks       # for one repo
+~/src/deckgen/bin/install-skills            # for your user
+~/src/deckgen/bin/install-skills ~/decks    # for one repo
 ```
 
 [docs/agents.md](docs/agents.md) covers installing the skills in each harness, what to put in your decks repo's `AGENTS.md`, and how agents should work with deckgen.
